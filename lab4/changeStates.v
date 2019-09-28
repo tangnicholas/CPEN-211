@@ -1,7 +1,7 @@
-`define s1 4'd0
-`define s2 4'd1
-`define s3 4'd2
-`define s4 4'd3
+`define s1 4'd5
+`define s2 4'd7
+`define s3 4'd9
+`define s4 4'd2
 `define s5 4'd4
 
 module changeStates(
