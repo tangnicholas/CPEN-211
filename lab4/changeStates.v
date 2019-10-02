@@ -1,8 +1,8 @@
-`define s1 4'd5
-`define s2 4'd7
-`define s3 4'd9
-`define s4 4'd2
-`define s5 4'd4
+`define s1 3'b000
+`define s2 3'b001
+`define s3 3'b010
+`define s4 3'b011
+`define s5 3'b100
 
 module changeStates(
 	input clk,
@@ -10,12 +10,12 @@ module changeStates(
 	input reset,
 	output reg [3:0] outDigit);
 
-	reg [3:0] stateCurrent;
+	reg [2:0] stateCurrent;
 
 	always @(posedge clk) begin
 		if (reset) begin
 			stateCurrent = `s1;						//references Prof's SS5 Code, modified.
-			outDigit = `s1;
+			outDigit = 4'd5;
 		end
 		else begin
 			case (stateCurrent)
@@ -44,15 +44,15 @@ module changeStates(
 					else begin
 						stateCurrent = `s4;	
 					end
-				default: stateCurrent = 4'bxxxx;
+				default: stateCurrent = 3'bxxx;
 			endcase
 			
 			case (stateCurrent)
-				`s1: outDigit = `s1;
-				`s2: outDigit = `s2;
-				`s3: outDigit = `s3;
-				`s4: outDigit = `s4;
-				`s5: outDigit = `s5;
+				`s1: outDigit = 4'd5;
+				`s2: outDigit = 4'd6;
+				`s3: outDigit = 4'd7;
+				`s4: outDigit = 4'd8;
+				`s5: outDigit = 4'd9;
 				default: outDigit = 4'bxxxx;
 			endcase		
 		end
