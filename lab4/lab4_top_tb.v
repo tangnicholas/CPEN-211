@@ -12,7 +12,7 @@ module lab4_top_tb;
 	wire[6:0] HEX0;
 
 	changeStates dut(.clk(clk), .revWhen0(rev), .reset(reset), .outDigit(outDigit));
-	lab4_top toplevdut(.SW(SW), .KEY(KEY), .HEX0(HEX0));
+	lab4_top toplevdut(.SW(SW), .KEY(~KEY), .HEX0(HEX0));
 
 	//task to check state and outputs (compares them)
 	task checkInOut;
@@ -44,7 +44,7 @@ module lab4_top_tb;
 	end
 
 	initial begin
-		reset = 1'b1; rev = 1'b1; err = 1'b0;	//reset button pressed (should show 5 as default)
+		reset = 1'b1; rev = 1'b1; err = 1'b0;	//reset button KEY[1] pressed (should show 5 as default)
 		#10;
 		checkInOut(`s1, 4'd5);
 		reset = 1'b0;
@@ -92,12 +92,20 @@ module lab4_top_tb;
 		else 
 			$display("Oh no! Something went wrong here!");
 	
-		KEY = 4'b0011; SW = 10'b000000001; #10; //both reset and clk keys are pressed. (This is for top level button inputs)
-		$display ("We expect 7 segment display to show %b, output is %b", 7'bxxxxxxx, HEX0);
+		KEY[0] = 1; KEY[1] = 1; SW = 10'b000000001; #10; //both reset and clk keys are pressed. (This and below are for top level I/O)
+		$display ("We expect 7 segment display to show %b (resetted --> 5), output is %b", 7'b0010010, HEX0);
 		
-		KEY = 4'b0000; #10; 
-		$display ("We expect 7 segment display to show %b, output is %b", 7'b0010010, HEX0);
+		KEY = 4'b0000; #10; //clk and reset keys are not pressed. Should stay same
+		$display ("We expect 7 segment display to show %b (5 inverted), output is %b", 7'b0010010, HEX0);
 
+		KEY[0] = 1; SW = 10'b00000000; #10;  //clk is pressed while switch is off (reverse mode)
+		$display ("We expect 7 segment display to show %b (9 inverted), output is %b", 7'b0010000, HEX0);
+
+		KEY[0] = 0; #5; KEY[0] = 1; #5; //same thing, clk is pressed again.
+		$display ("We expect 7 segment display to show %b (8 inverted), output is %b", 7'b0000000, HEX0);
+
+		KEY[0] = 0; SW = 10'b00000001; #10; KEY[0] = 1; #5; //switch is now on (not reversed), clk is pressed.
+		$display ("We expect 7 segment display to show %b (9 inverted), output is %b", 7'b0010000, HEX0);
 		$stop;
 	end
 	
