@@ -141,19 +141,19 @@ module input_iface(clk, SW, datapath_in, write, vsel, loada, loadb, asel, bsel,
   };
 
   // LEDR[7:0] shows other bits
-  assign LEDR = sel_sw ? ctrl_sw : {1'b0, datapath_in[7:0]};  
+	assign LEDR = sel_sw ? ctrl_sw : {1'b0, datapath_in[7:0]};  
 endmodule         
 
 
 module vDFF(clk,D,Q);
-  parameter n=1;
-  input clk;
-  input [n-1:0] D;
-  output [n-1:0] Q;
-  reg [n-1:0] Q;
+	parameter n=1;
+	input clk;
+	input [n-1:0] D;
+	output [n-1:0] Q;
+	reg [n-1:0] Q;
 
-  always @(posedge clk)
-    Q <= D;
+	always @(posedge clk)
+    	Q <= D;
 endmodule
 
 
@@ -165,8 +165,10 @@ endmodule
 // the book is not the same as on the DE1-SoC (see comments below).
 
 module sseg(in,segs);
-  input [3:0] in;
-  output [6:0] segs;
+	input [3:0] in;
+	output [6:0] segs;
+
+	reg [6:0] outHEX;
 
   // NOTE: The code for sseg below is not complete: You can use your code from
   // Lab4 to fill this in or code from someone else's Lab4.  
@@ -213,6 +215,28 @@ module sseg(in,segs);
   //            14 | E
   //            15 | F
 
-  assign segs = 7'b0001110;  // this will output "F" 
+	assign segs = outHEX;  // this will output "F" 
+
+	always @(in) begin
+		case (in)
+			4'd0: outHEX = 7'b1000000;						//This is for 0
+			4'd1: outHEX = 7'b1111001;						//This is for 1 etc.
+			4'd2: outHEX = 7'b0100100;
+			4'd3: outHEX = 7'b0110000;
+			4'd4: outHEX = 7'b0011001;
+			4'd5: outHEX = 7'b0010010;
+			4'd6: outHEX = 7'b0000010;
+			4'd7: outHEX = 7'b1111000;
+			4'd8: outHEX = 7'b0000000;
+			4'd9: outHEX = 7'b0010000;
+			4'd10: outHEX = 7'b0001000;
+			4'd11: outHEX = 7'b0000011;
+			4'd12: outHEX = 7'b1000110;
+			4'd13: outHEX = 7'b0100001;
+			4'd14: outHEX = 7'b0000110;
+			4'd15: outHEX = 7'b0001110;
+			default: outHEX = 7'bxxxxxxx;
+		endcase
+	end
 
 endmodule
