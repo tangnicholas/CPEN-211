@@ -1,24 +1,24 @@
-
 module regfile(data_in,writenum,write,readnum,clk,data_out);
   input [15:0] data_in;
   input [2:0] writenum, readnum;
   input write, clk;
   output [15:0] data_out;
 
-  reg [7:0] oneHotWrite;
-  reg [15:0] rout_a0, rout_a1, rout_a2, rout_a3, rout_a4, rout_a5, rout_a6, rout_a7;
+  wire [7:0] oneHotWrite;
+  wire [15:0] rout_a0, rout_a1, rout_a2, rout_a3, rout_a4, rout_a5, rout_a6, rout_a7;
 
   decoder #(3,8) writeDecode(writenum, oneHotWrite);
-  vDFFE #(16) r0(clk, write, data_in, rout_a0);
-  vDFFE #(16) r1(clk, write, data_in, rout_a1);
-  vDFFE #(16) r2(clk, write, data_in, rout_a2);
-  vDFFE #(16) r3(clk, write, data_in, rout_a3);
-  vDFFE #(16) r4(clk, write, data_in, rout_a4);
-  vDFFE #(16) r5(clk, write, data_in, rout_a5);
-  vDFFE #(16) r6(clk, write, data_in, rout_a6);
-  vDFFE #(16) r7(clk, write, data_in, rout_a7);
+  
+  vDFFE #(16) r0(clk, (write & oneHotWrite[0]), data_in, rout_a0);
+  vDFFE #(16) r1(clk, (write & oneHotWrite[1]), data_in, rout_a1);
+  vDFFE #(16) r2(clk, (write & oneHotWrite[2]), data_in, rout_a2);
+  vDFFE #(16) r3(clk, (write & oneHotWrite[3]), data_in, rout_a3);
+  vDFFE #(16) r4(clk, (write & oneHotWrite[4]), data_in, rout_a4);
+  vDFFE #(16) r5(clk, (write & oneHotWrite[5]), data_in, rout_a5);
+  vDFFE #(16) r6(clk, (write & oneHotWrite[6]), data_in, rout_a6);
+  vDFFE #(16) r7(clk, (write & oneHotWrite[7]), data_in, rout_a7);
 
-  Muxb8 #(16) (rout_a7, rout_a6, rout_a5, rout_a4, rout_a3, rout_a2, rout_a1, rout_a0, readnum, data_out) ;
+  Muxb8 #(16) m(rout_a7, rout_a6, rout_a5, rout_a4, rout_a3, rout_a2, rout_a1, rout_a0, readnum, data_out);
 // fill out the rest
 
 
@@ -56,19 +56,19 @@ module Muxb8(a7, a6, a5, a4, a3, a2, a1, a0, readnum, data_out) ;
   
   parameter k = 1 ;
   input [k-1:0] a0, a1, a2, a3, a4, a5, a6, a7 ;  // inputs
-  input [1:0]   readnum ;          // binary select
+  input [2:0]   readnum ;          // binary select
   output[k-1:0] data_out ;
   wire  [7:0]   selectOneHot;
   
   decoder #(3,8) readDecoder(readnum, selectOneHot); // Decoder converts binary to one-hot   
-  Mux8_16 #(8)  m(a7, a6, a5, a4, a3, a2, a1, a0, selectOneHot, data_out) ; // multiplexer selects input 
+  Mux8_16 #(16)  m(a7, a6, a5, a4, a3, a2, a1, a0, selectOneHot, data_out) ; // multiplexer selects input 
 
 endmodule
 
 module Mux8_16 (a7, a6, a5, a4, a3, a2, a1, a0, selectOneHot, data_out);
 	parameter k = 1 ;
 	input [k-1:0] a0, a1, a2, a3, a4, a5, a6, a7 ;  // inputs
-	input [2:0]   selectOneHot ; // one-hot select
+  input [7:0]   selectOneHot ; // one-hot select
 	output[k-1:0] data_out ;
 	reg [k-1:0] data_out ;
 
