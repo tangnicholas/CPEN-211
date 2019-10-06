@@ -5,7 +5,7 @@ module regfile(data_in,writenum,write,readnum,clk,data_out);
   input write, clk;
   output [15:0] data_out;
 
-  wire [7:0] oneHotWrite;
+  reg [7:0] oneHotWrite;
   reg [15:0] rout_a0, rout_a1, rout_a2, rout_a3, rout_a4, rout_a5, rout_a6, rout_a7;
 
   decoder #(3,8) writeDecode(writenum, oneHotWrite);
@@ -31,7 +31,7 @@ module decoder(binary, oneHotCode);
 	input [n-1:0] binary;
 	output [m-1:0] oneHotCode;
 
-	wire oneHotCode = 1 << binary;
+	assign oneHotCode = 1 << binary;
 
 endmodule
 
