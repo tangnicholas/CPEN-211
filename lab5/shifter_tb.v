@@ -9,7 +9,7 @@ module shifter_tb;
 
 	initial begin
 		err = 1'b0;
-		in = 16'b1xxx0xxxxxxxxxx1;
+		in = 16'b1001010000000001;
 		
 		#10;
 		$display("checking shift not initialized");
@@ -19,25 +19,25 @@ module shifter_tb;
 		shift = 2'b00;
 		#10;
 		$display("checking shift = 00");
-		if (sout != 16'b1xxx0xxxxxxxxxx1)
+		if (sout != 16'b1001010000000001)
 			err = 1'b1;
 
 		shift = 2'b01;
 		#10;
 		$display("checking shift = 01");
-		if (sout != 16'bxxx0xxxxxxxxxx10)
+		if (sout != 16'b0010100000000010)
 			err = 1'b1;
 
 		shift = 2'b10;
-		#5;
+		#10;
 		$display("checking shift = 10");
-		if (sout != 16'b01xxx0xxxxxxxxxx)
+		if (sout != 16'b0100101000000000)
 			err = 1'b1;
 
 		shift = 2'b11;
-		#5;
+		#10;
 		$display("checking shift = 11");
-		if (sout != 16'b11xxx0xxxxxxxxxx)
+		if (sout != 16'b1100101000000000)
 			err = 1'b1;
 
 		if (err === 1'b1)
