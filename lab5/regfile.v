@@ -5,23 +5,23 @@ module regfile(data_in,writenum,write,readnum,clk,data_out);
   output [15:0] data_out;
 
   wire [7:0] oneHotWrite;
-  wire [15:0] rout_a0, rout_a1, rout_a2, rout_a3, rout_a4, rout_a5, rout_a6, rout_a7;
+  wire [15:0] R0, R1, R2, R3, R4, R5, R6, R7;
 	
   //call the decoder module
   decoder #(3,8) writeDecode(writenum, oneHotWrite);
   
   //call the registers with load enables module
-  vDFFE #(16) r0(clk, (write & oneHotWrite[0]), data_in, rout_a0);
-  vDFFE #(16) r1(clk, (write & oneHotWrite[1]), data_in, rout_a1);
-  vDFFE #(16) r2(clk, (write & oneHotWrite[2]), data_in, rout_a2);
-  vDFFE #(16) r3(clk, (write & oneHotWrite[3]), data_in, rout_a3);
-  vDFFE #(16) r4(clk, (write & oneHotWrite[4]), data_in, rout_a4);
-  vDFFE #(16) r5(clk, (write & oneHotWrite[5]), data_in, rout_a5);
-  vDFFE #(16) r6(clk, (write & oneHotWrite[6]), data_in, rout_a6);
-  vDFFE #(16) r7(clk, (write & oneHotWrite[7]), data_in, rout_a7);
+  vDFFE #(16) r0(clk, (write & oneHotWrite[0]), data_in, R0);
+  vDFFE #(16) r1(clk, (write & oneHotWrite[1]), data_in, R1);
+  vDFFE #(16) r2(clk, (write & oneHotWrite[2]), data_in, R2);
+  vDFFE #(16) r3(clk, (write & oneHotWrite[3]), data_in, R3);
+  vDFFE #(16) r4(clk, (write & oneHotWrite[4]), data_in, R4);
+  vDFFE #(16) r5(clk, (write & oneHotWrite[5]), data_in, R5);
+  vDFFE #(16) r6(clk, (write & oneHotWrite[6]), data_in, R6);
+  vDFFE #(16) r7(clk, (write & oneHotWrite[7]), data_in, R7);
 
   //call the multiplexer module
-  Muxb8 #(16) m(rout_a7, rout_a6, rout_a5, rout_a4, rout_a3, rout_a2, rout_a1, rout_a0, readnum, data_out);
+  Muxb8 #(16) m(R7, R6, R5, R4, R3, R2, R1, R0, readnum, data_out);
 
 
 endmodule

@@ -45,8 +45,9 @@ module datapath ( clk, readnum, vsel, loada, loadb, shift, asel, bsel, ALUop, lo
 
 
 ///instantiating the modules to test
+
   Muxb2 vselM(datapath_in, datapath_out, vsel, data_in);
-  regfile U0(.data_in(data_in), .writenum(writenum), .write(write), .readnum(readnum), .clk(clk), .data_out(data_out));
+  regfile REGFILE(.data_in(data_in), .writenum(writenum), .write(write), .readnum(readnum), .clk(clk), .data_out(data_out));
   
   vDFFEf vA(clk, loada, data_out, amidout);
   Muxb2 aselM(16'b0, amidout, asel, Ain);
