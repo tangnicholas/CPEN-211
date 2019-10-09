@@ -3,11 +3,10 @@ module shifter(in,shift,sout);
 	input [1:0] shift;
 	output reg[15:0] sout;
 
-	reg [15:0] in_temp;
 	reg copyIn15;
 
 
-	always @(shift) begin
+	always @(shift, in) begin
 		copyIn15 = in[0];
 
 		if (shift === 2'b00) //00, then in = out
