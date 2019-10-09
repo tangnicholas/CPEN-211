@@ -10,9 +10,9 @@ module shifter(in,shift,sout);
 	always @(shift) begin
 		copyIn15 = in[0];
 
-		if (shift === 2'b00)
+		if (shift === 2'b00) //00, then in = out
 			sout = in;
-		else if (shift === 2'b01) begin
+		else if (shift === 2'b01) begin //1 --> shift left
 			sout[15] = in[14];
 			sout[14] = in[13];
 			sout[13] = in[12];
@@ -30,7 +30,7 @@ module shifter(in,shift,sout);
 			sout[1] = in[0];
 			sout[0] = 0;
 		end
-		else if (shift === 2'b10 | shift === 2'b11) begin
+		else if (shift === 2'b10 | shift === 2'b11) begin //shift right
 			sout[0] = in[1];
 			sout[1] = in[2];
 			sout[2] = in[3];
@@ -47,10 +47,10 @@ module shifter(in,shift,sout);
 			sout[13] = in[14];
 			sout[14] = in[15];
 
-			if (shift === 2'b10)
+			if (shift === 2'b10) //MSB is 0
 				sout[15] = 0;
 			else
-				sout[15] = copyIn15;
+				sout[15] = copyIn15; //MSB is copy of B[15]
 		end
 		else
 			sout = 16'bx;

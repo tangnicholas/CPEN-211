@@ -6,8 +6,6 @@ output Z;
 
 // fill out the rest
 
-reg ain;
-reg bin;
 reg [15:0] out; 
 reg Z;
 
