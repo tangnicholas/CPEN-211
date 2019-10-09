@@ -1,4 +1,4 @@
-module regfile_tb;
+module regfile_tb ();
 
   //declare signals to test 
   reg clk;
@@ -13,7 +13,7 @@ module regfile_tb;
   reg err;
 
   ///instantiating the modules to test
-  regfile dut(.data_in(data_in), .writenum(writenum), .write(write), .readnum(readnum), .clk(clk), .data_out(data_out));
+  regfile DUT (.data_in(data_in), .writenum(writenum), .write(write), .readnum(readnum), .clk(clk), .data_out(data_out));
   decoder decodeDUT(.binary(bin), .oneHotCode(OH));
   
   //clock to forever alternate so that we can check all + rising edge cases.

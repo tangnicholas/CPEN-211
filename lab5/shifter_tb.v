@@ -1,11 +1,11 @@
-module shifter_tb;
+module shifter_tb ();
 	reg [15:0] in;
 	reg [1:0] shift;
 	wire [15:0] sout;
 
 	reg err;
 
-	shifter dut(.in(in), .shift(shift), .sout(sout));
+	shifter DUT(.in(in), .shift(shift), .sout(sout));
 
 	initial begin
 		err = 1'b0;

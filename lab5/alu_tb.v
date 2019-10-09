@@ -1,4 +1,3 @@
-
 module ALU_tb ();
 // No inputs or outputs, because it is a testbench
 
