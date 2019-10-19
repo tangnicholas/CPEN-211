@@ -63,7 +63,7 @@ module datapath ( clk, readnum, vsel, loada, loadb, shift, asel, bsel, ALUop, lo
   ALU U2(.Ain(Ain), .Bin(Bin), .ALUop(ALUop), .out(out), .Z(Z));
   vDFFEf vC(clk, loadc, out, C);
 
-  AddSub checkOverflow(Ain, Bin, ALUop, 16'bx, ovf) ;
+  AddSub #(16) checkOverflow(Ain, Bin, ALUop, 16'bx, ovf) ;
   vDFFEf #(3) vStatus(clk, loads, {Z, out[15], ovf}, Z_out);
 
   assign PC = 8'b0;
