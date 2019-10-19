@@ -134,7 +134,7 @@ module Muxb4(a3, a2, a1, a0, mux4_in, mux4_out) ;
 
 endmodule
   
-// multi-bit adder - behavioral
+// multi-bit adder - behavioral (Taken from Slide Set 6)
 module Adder1(a,b,cin,cout,s) ;
   parameter n = 8 ;
   input [n-1:0] a, b ;
@@ -147,7 +147,7 @@ module Adder1(a,b,cin,cout,s) ;
   assign {cout, s} = a + b + cin ;
 endmodule 
 
-// add a+b or subtract a-b, check for overflow
+// add a+b or subtract a-b, check for overflow (Also taken from Slide set 6, used to check overlflow of the ALU inputs)
 module AddSub(a,b,sub,s,ovf) ;
   parameter n = 8 ;
   input [n-1:0] a, b ;
