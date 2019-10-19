@@ -21,7 +21,7 @@ module datapath ( clk, readnum, vsel, loada, loadb, shift, asel, bsel, ALUop, lo
   
   input  clk;
   input  write;
-  input  [15:0] madata, sximm8;
+  input  [15:0] mdata, sximm8;
   input  [7:0] PC;
   input  [2:0] readnum;
   input  [2:0] writenum;
@@ -74,6 +74,7 @@ module datapath ( clk, readnum, vsel, loada, loadb, shift, asel, bsel, ALUop, lo
       2'b00: AddSubop = 0;
       2'b01: AddSubop = 1;
       default: AddSubop = 1'bx;
+    endcase
   end
 
 endmodule
@@ -93,7 +94,7 @@ module Muxb2(a1, a0, mux_in, mux_out) ;
       1'b0: mux_out = a0 ;
       1'b1: mux_out = a1 ;
       default: mux_out = {k{1'bx}} ;
-  endcase
+  	endcase
   end
 
 endmodule
@@ -129,7 +130,7 @@ module Muxb4(a3, a2, a1, a0, mux4_in, mux4_out) ;
       2'b01: mux4_out = a1;
       2'b10: mux4_out = a2;
       2'b11: mux4_out = a3;
-      default: mux_out = {k{1'bx}} ;
+      default: mux4_out = {k{1'bx}} ;
   endcase
   end
 

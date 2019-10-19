@@ -97,6 +97,8 @@ module sseg(in,segs);
   input [3:0] in;
   output [6:0] segs;
 
+  reg [6:0] outHEX;
+
   // NOTE: The code for sseg below is not complete: You can use your code from
   // Lab4 to fill this in or code from someone else's Lab4.  
   //
@@ -165,7 +167,5 @@ module sseg(in,segs);
       default: outHEX = 7'bxxxxxxx;
     endcase
   end
-
-endmodule
 
 endmodule
