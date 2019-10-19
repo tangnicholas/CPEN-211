@@ -22,10 +22,10 @@ module datapath ( clk, readnum, vsel, loada, loadb, shift, asel, bsel, ALUop, lo
 	input  clk;
 	input  write;
 	input  [15:0] madata, sximm8;
-  input  [7:0] PC;
+	input  [7:0] PC;
 	input  [2:0] readnum;
 	input  [2:0] writenum;
-  input  [15:0] sximm5;
+	input  [15:0] sximm5;
 	wire  [15:0] data_out;
 	wire  [15:0] data_in;
 
