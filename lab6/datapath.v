@@ -10,40 +10,40 @@ A, B,C  SELECT
 
 */
 
-module datapath ( clk, readnum, vsel, loada, loadb, shift, asel, bsel, ALUop, loadc, loads, writenum, write, mdata, sximm8, PC, Z_out, C, sximm5); // recall from Lab 4 that KEY0 is 1 when NOT pushed)	
-	input  [1:0] vsel ;
-	input  loada;
-	input  loadb;
-	input  asel ;
-	input  bsel ;
-	input  loadc;
-	input  loads;
+module datapath ( clk, readnum, vsel, loada, loadb, shift, asel, bsel, ALUop, loadc, loads, writenum, write, mdata, sximm8, PC, Z_out, C, sximm5); // recall from Lab 4 that KEY0 is 1 when NOT pushed) 
+  input  [1:0] vsel ;
+  input  loada;
+  input  loadb;
+  input  asel ;
+  input  bsel ;
+  input  loadc;
+  input  loads;
   
-	input  clk;
-	input  write;
-	input  [15:0] madata, sximm8;
-	input  [7:0] PC;
-	input  [2:0] readnum;
-	input  [2:0] writenum;
-	input  [15:0] sximm5;
-	wire  [15:0] data_out;
-	wire  [15:0] data_in;
+  input  clk;
+  input  write;
+  input  [15:0] madata, sximm8;
+  input  [7:0] PC;
+  input  [2:0] readnum;
+  input  [2:0] writenum;
+  input  [15:0] sximm5;
+  wire  [15:0] data_out;
+  wire  [15:0] data_in;
 
-	wire  [15:0] Ain;
-	wire  [15:0] Bin; 
-	input  [1:0] ALUop; 
-	wire  [15:0] out; 
-	output  Z_out;
-	wire  Z;
+  wire  [15:0] Ain;
+  wire  [15:0] Bin; 
+  input  [1:0] ALUop; 
+  wire  [15:0] out; 
+  output  Z_out;
+  wire  Z;
 
-	wire  [15:0] in;
-	input  [1:0] shift;
-	wire [15:0] sout;
+  wire  [15:0] in;
+  input  [1:0] shift;
+  wire [15:0] sout;
   
-	output  [15:0] C;
+  output  [15:0] C;
   
   //for between A and asel
-	wire  [15:0] amidout;
+  wire  [15:0] amidout;
 
   //for checking overflow variable
   reg AddSubop;
@@ -63,7 +63,7 @@ module datapath ( clk, readnum, vsel, loada, loadb, shift, asel, bsel, ALUop, lo
   ALU U2(.Ain(Ain), .Bin(Bin), .ALUop(ALUop), .out(out), .Z(Z));
   vDFFEf vC(clk, loadc, out, C);
 
-  AddSub #(16) checkOverflow(Ain, Bin, ALUop, 16'bx, ovf) ;
+  AddSub #(16,2) checkOverflow(Ain, Bin, ALUop, 16'bx, ovf) ;
   vDFFEf #(3) vStatus(clk, loads, {Z, out[15], ovf}, Z_out);
 
   assign PC = 8'b0;
@@ -92,8 +92,8 @@ module Muxb2(a1, a0, mux_in, mux_out) ;
     case(mux_in) 
       1'b0: mux_out = a0 ;
       1'b1: mux_out = a1 ;
-    	default: mux_out = {k{1'bx}} ;
-	endcase
+      default: mux_out = {k{1'bx}} ;
+  endcase
   end
 
 endmodule
@@ -111,15 +111,16 @@ module vDFFEf(clk, en, in, out) ;
 
   always @(posedge clk) begin
     out = next_out;  
-	end
+  end
 
 endmodule
 
 //MUX FOR 16 bit select 4 in binary.
 module Muxb4(a3, a2, a1, a0, mux4_in, mux4_out) ;
   parameter k = 16 ;
+  parameter m = 2;
   input [k-1:0] a0, a1, a2, a3;  // inputs
-  input  mux4_in ;          // binary select
+  input  [m-1:0] mux4_in ;          // binary select
   output reg [k-1:0] mux4_out ;
   
   always @(*) begin
