@@ -30,9 +30,9 @@ vDFFE #(16) inreg(clk,load,in,inreg_out);
   wire [15:0] sximm5 = ~{11'b0, imm5} + 1; //sign extend
   wire [15:0] sximm8 = ~{8'b0, imm8} + 1;  //sign extend
   wire ALUop = inreg_out[12:11];
-  
-  Muxb3 #(3,2) numR(Rn, Rd, Rm, nsel, readnum);
-  Muxb3 #(3,2) numW(Rn, Rd, Rm, nsel, writenum);
+	
+  Muxb3 #(3,2) numR(Rm, Rd, Rn, nsel, readnum);
+Muxb3 #(3,2) numW(Rm, Rd, Rn, nsel, writenum);
   
 //FSM declaration
      
