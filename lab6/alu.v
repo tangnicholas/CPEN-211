@@ -2,12 +2,12 @@ module ALU(Ain,Bin,ALUop,out,Z);
 input [15:0] Ain, Bin;
 input [1:0] ALUop;
 output [15:0] out;
-output Z;
+output Z_in;
 
 // fill out the rest
 
 reg [15:0] out; 
-reg Z;
+reg Z_in;
 
 always @(*) begin
 	// Ain + Bin
@@ -29,9 +29,9 @@ always @(*) begin
 
 	//if out is zero, Z = 1
 	if (out == 16'b0000000000000000)
-		 Z = 1'b1;		
+		 Z_in = 1'b1;		
 	else 
-		 Z = 1'b0;
+		 Z_in = 1'b0;
 
 end 
 endmodule 
