@@ -39,7 +39,7 @@ vDFFE #(16) inreg(clk,load,in,inreg_out);
 				 .loadb(loadb), .loadc(loadc), .loads(loads), .asel(asel), .bsel(bsel), .write(write), .vsel(vsel));
 	datapath datapathInst(.clk(clk), .readnum(readnum), .vsel(vsel), .loada(loada), .loadb(loadb), .shift(shift), .asel(asel),
 			      .bsel(bsel), .ALUop(ALUop), .loadc(loadc), .loads(loads), .writenum(writenum), .write(write), .mdata(madata),
-			      .sximm8(sximm8), .PC(PC), .Z_out(Z_out), .C(C), .sximm5(sximm5));
+			      .sximm8(sximm8), .PC(PC), .Z(Z), .V(V), .N(N), .C(C), .sximm5(sximm5));
   
   
   
