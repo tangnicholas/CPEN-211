@@ -26,7 +26,7 @@ module FSM_chooser(clk, s, reset, opcode, op, nsel, w, loada, loadb, loadc, load
   //reg [10:0] chosenOutput = {loada, loadb, loadc, asel, bsel, vsel, write, nsel, m}; //1, 1, 1, 1, 1, 2, 1, 2, m
   wire wANDs = w & s;
   
-  muxChooser choose(`MVN, `AND, `CMP, `ADD, `MOVRd, `MOVRn, {opcode, op} , next_state);
+  MuxChooser choose(`MVN, `AND, `CMP, `ADD, `MOVRd, `MOVRn, {opcode, op} , next_state);
   
   always @(posedge clk) begin 
     
