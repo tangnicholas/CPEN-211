@@ -42,13 +42,17 @@ module datapath ( clk, readnum, vsel, loada, loadb, shift, asel, bsel, ALUop, lo
   input  [1:0] shift;
   wire [15:0] sout;
   
-  output  [15:0] C;
+  output reg [15:0] C;
   
   //for between A and asel
   wire  [15:0] amidout;
 
   //for checking overflow variable
   reg AddSubop;
+  wire [15:0] s;
+  
+  assign PC = 8'b0;
+  assign mdata = 16'b0;
 
 ///instantiating the modules to test
 
@@ -65,11 +69,9 @@ module datapath ( clk, readnum, vsel, loada, loadb, shift, asel, bsel, ALUop, lo
   ALU U2(.Ain(Ain), .Bin(Bin), .ALUop(ALUop), .out(out), .Z_in(Z_in));
   vDFFEf vC(clk, loadc, out, C);
 
-  AddSub #(16,2) checkOverflow(Ain, Bin, ALUop, 16'bx, ovf) ;
+  AddSub #(16) checkOverflow(Ain, Bin, 1'b1, s, ovf) ;
   vDFFEf #(3) vStatus(clk, loads, {Z_in, out[15], ovf}, {Z, N, V});
 
-  assign PC = 8'b0;
-  assign mdata = 8'b0;
 
   always @(ALUop, AddSubop) begin
     case (ALUop)

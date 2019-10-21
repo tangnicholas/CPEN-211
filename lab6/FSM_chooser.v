@@ -18,7 +18,7 @@ module FSM_chooser(clk, s, reset, opcode, op, nsel, w, loada, loadb, loadc, load
   reg loada, loadb, loadc, loads, asel, bsel, write, w;
   reg [1:0] nsel, vsel;
   
-  reg [4:0] next_state; 
+  reg [2:0] next_state; 
   reg [2:0] step;
   
 
@@ -76,7 +76,7 @@ endmodule
 
 
 module MuxChooser(a5, a4, a3, a2, a1, a0, muxC_in, muxC_out) ;
-  parameter k = 6;
+  parameter k = 3;
   parameter m = 5;
   input [k-1:0] a5, a4, a3, a2, a1, a0;  // inputs
   input  [m-1:0] muxC_in;          // binary select
