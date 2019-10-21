@@ -30,12 +30,16 @@ vDFFE #(16) inreg(clk,load,in,inreg_out);
   wire [15:0] sximm5 = ~{11'b0, imm5} + 1; //sign extend
   wire [15:0] sximm8 = ~{8'b0, imm8} + 1;  //sign extend
   wire ALUop = inreg_out[12:11];
-	
-  Muxb3 #(3,2) numR(Rm, Rd, Rn, nsel, readnum);
-Muxb3 #(3,2) numW(Rm, Rd, Rn, nsel, writenum);
+
+	Muxb3 #(3,2) numR(Rm, Rd, Rn, nsel, readnum);
+	Muxb3 #(3,2) numW(Rm, Rd, Rn, nsel, writenum);
   
 //FSM declaration
-     
+	FSM_chooser stateMachine(.clk(clk), .s(s), .reset(reset), .opcode(opcode), .op(op), .nsel(nsel), .w(w), .loada(loada),
+				 .loadb(loadb), .loadc(loadc), .loads(loads), .asel(asel), .bsel(bsel), .write(write), .vsel(vsel));
+	datapath datapathInst(.clk(clk), .readnum(readnum), .vsel(vsel), .loada(loada), .loadb(loadb), .shift(shift), .asel(asel),
+			      .bsel(bsel), .ALUop(ALUop), .loadc(loadc), .loads(loads), .writenum(writenum), .write(write), .mdata(madata),
+			      .sximm8(sximm8), .PC(PC), .Z_out(Z_out), .C(C), .sximm5(sximm5));
   
   
   
