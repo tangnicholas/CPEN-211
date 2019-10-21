@@ -10,7 +10,7 @@ A, B,C  SELECT
 
 */
 
-module datapath ( clk, readnum, vsel, loada, loadb, shift, asel, bsel, ALUop, loadc, loads, writenum, write, mdata, sximm8, PC, Z_out, C, sximm5); // recall from Lab 4 that KEY0 is 1 when NOT pushed) 
+module datapath ( clk, readnum, vsel, loada, loadb, shift, asel, bsel, ALUop, loadc, loads, writenum, write, mdata, sximm8, PC, Z, V, N, C, sximm5); // recall from Lab 4 that KEY0 is 1 when NOT pushed) 
   input  [1:0] vsel ;
   input  loada;
   input  loadb;
@@ -33,8 +33,10 @@ module datapath ( clk, readnum, vsel, loada, loadb, shift, asel, bsel, ALUop, lo
   wire  [15:0] Bin; 
   input  [1:0] ALUop; 
   wire  [15:0] out; 
-  output  Z_out;
-  wire  Z;
+  output  Z;
+  wire Z_in;
+  output V;
+  output N;
 
   wire  [15:0] in;
   input  [1:0] shift;
@@ -60,11 +62,11 @@ module datapath ( clk, readnum, vsel, loada, loadb, shift, asel, bsel, ALUop, lo
   shifter U1(.in(in), .shift(shift), .sout(sout));
   Muxb2 bselM(sximm5, sout, bsel, Bin);
   
-  ALU U2(.Ain(Ain), .Bin(Bin), .ALUop(ALUop), .out(out), .Z(Z));
+  ALU U2(.Ain(Ain), .Bin(Bin), .ALUop(ALUop), .out(out), .Z_in(Z_in));
   vDFFEf vC(clk, loadc, out, C);
 
   AddSub #(16,2) checkOverflow(Ain, Bin, ALUop, 16'bx, ovf) ;
-  vDFFEf #(3) vStatus(clk, loads, {Z, out[15], ovf}, Z_out);
+  vDFFEf #(3) vStatus(clk, loads, {Z_in, out[15], ovf}, {Z, N, V});
 
   assign PC = 8'b0;
   assign mdata = 8'b0;
@@ -94,7 +96,7 @@ module Muxb2(a1, a0, mux_in, mux_out) ;
       1'b0: mux_out = a0 ;
       1'b1: mux_out = a1 ;
       default: mux_out = {k{1'bx}} ;
-  	endcase
+    endcase
   end
 
 endmodule
