@@ -33,8 +33,8 @@ vDFFE #(16) inreg(clk,load,in,inreg_out);
   
   //outputs from decoder to go to datapath (and modules that lead to output)
   wire [1:0] shift = inreg_out[4:3];
-  wire [15:0] sximm5 = ~{11'b0, imm5} + 1; //sign extend
-  wire [15:0] sximm8 = ~{8'b0, imm8} + 1;  //sign extend
+  wire [15:0] sximm5 = {11'b0, imm5}; //sign extend
+  wire [15:0] sximm8 = {8'b0, imm8};  //sign extend
   wire [1:0] ALUop = inreg_out[12:11];
 
   Muxb3 #(3,2) numR(Rm, Rd, Rn, nsel, readnum);
@@ -43,7 +43,7 @@ vDFFE #(16) inreg(clk,load,in,inreg_out);
 //FSM declaration
   FSM_chooser stateMachine(.clk(clk), .s(s), .reset(reset), .opcode(opcode), .op(op), .nsel(nsel), .w(w), .loada(loada),
          .loadb(loadb), .loadc(loadc), .loads(loads), .asel(asel), .bsel(bsel), .write(write), .vsel(vsel));
-  datapath DP(.clk(clk), .readnum(readnum), .vsel(vsel), .loada(loada), .loadb(loadb), .shift(shift), .asel(asel),
+  datapath datapathInst(.clk(clk), .readnum(readnum), .vsel(vsel), .loada(loada), .loadb(loadb), .shift(shift), .asel(asel),
             .bsel(bsel), .ALUop(ALUop), .loadc(loadc), .loads(loads), .writenum(writenum), .write(write), .mdata(mdata),
             .sximm8(sximm8), .PC(PC), .Z(Z), .V(V), .N(N), .C(C), .sximm5(sximm5));
   
