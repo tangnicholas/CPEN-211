@@ -1,4 +1,4 @@
-module cpu(clk,reset,s,load,in,out,N,V,Z,w);
+module cpu(clk, reset, s, load, in, out, N, V, Z, w);
   input clk, reset, s, load;
   input [15:0] in;
   output [15:0] out;
@@ -8,8 +8,11 @@ module cpu(clk,reset,s,load,in,out,N,V,Z,w);
 //FSM CHOOSER VARIABLES
   wire [2:0] readnum, writenum;
   wire [15:0] mdata, C;
-  assign out = C;
   wire [7:0] PC;
+  assign out = C;
+
+  assign PC = 8'b0;
+  assign mdata = 16'b0;
 
 // INSTRUCTION REGISTER 
   //on the rising edge of the clock 
@@ -33,8 +36,8 @@ vDFFE #(16) inreg(clk,load,in,inreg_out);
   
   //outputs from decoder to go to datapath (and modules that lead to output)
   wire [1:0] shift = inreg_out[4:3];
-  wire [15:0] sximm5 = {11'b0, imm5}; //sign extend
-  wire [15:0] sximm8 = {8'b0, imm8};  //sign extend
+  wire [15:0] sximm5 = { (imm5[4]? 11'b1: 11'b0), imm5 + imm5[4]}; //sign extend
+  wire [15:0] sximm8 = { (imm8[7]? 8'b1: 8'b0), imm8 + imm8[7]};  //sign extend
   wire [1:0] ALUop = inreg_out[12:11];
 
   Muxb3 #(3,2) numR(Rm, Rd, Rn, nsel, readnum);
