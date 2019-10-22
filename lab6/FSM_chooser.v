@@ -32,43 +32,42 @@ module FSM_chooser(clk, s, reset, opcode, op, nsel, w, loada, loadb, loadc, load
     
     if (~((next_state === `WAIT & wANDs === 0) | reset === 1)) begin
       casex ({next_state, step}) 
-        {`MOVRn, 3'bx}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, next_state, step} = {12'bx_x_x_x_x_10_1_00_0_x, `WAIT, 3'bxxx};
+        {`MOVRn, 3'bx}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, next_state, step} = {12'b0_0_0_0_0_10_1_00_0_0, `WAIT, 3'd0};
         
-        {`MOVRd, 3'd0}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, next_state, step} = {12'bx_1_1_1_x_10_0_10_0_x, `MOVRd, 3'd1};
-        {`MOVRd, 3'd1}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, next_state, step} = {12'bx_0_0_0_x_00_1_01_x_x, `WAIT, 3'bxxx};
+        {`MOVRd, 3'd0}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, next_state, step} = {12'b0_1_1_1_0_10_0_10_0_0, `MOVRd, 3'd1};
+        {`MOVRd, 3'd1}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, next_state, step} = {12'b0_0_0_0_0_00_1_01_0_0, `WAIT, 3'd0};
         
-        {`ADD, 3'd0}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, next_state, step} = {12'b1_x_x_0_x_10_0_00_0_x, `ADD, 3'd1};
-        {`ADD, 3'd1}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, next_state, step} = {12'b0_1_x_x_0_10_x_10_x_x, `ADD, 3'd2};
-        {`ADD, 3'd2}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, next_state, step} = {12'bx_0_1_x_x_10_x_xx_x_x, `ADD, 3'd3};
-        {`ADD, 3'd3}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, next_state, step} = {12'bx_x_0_x_x_00_1_01_x_x, `WAIT, 3'bxxx};
+        {`ADD, 3'd0}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, next_state, step} = {12'b1_0_0_0_0_10_0_00_0_0, `ADD, 3'd1};
+        {`ADD, 3'd1}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, next_state, step} = {12'b0_1_0_0_0_10_0_10_0_0, `ADD, 3'd2};
+        {`ADD, 3'd2}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, next_state, step} = {12'b0_0_1_0_0_10_0_10_0_0, `ADD, 3'd3};
+        {`ADD, 3'd3}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, next_state, step} = {12'b0_0_0_0_0_00_1_01_0_0, `WAIT, 3'd0};
         
-        {`CMP, 3'd0}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, next_state, step} = {12'b1_x_x_0_x_10_0_00_0_x, `CMP, 3'd1};
-        {`CMP, 3'd1}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, next_state, step} = {12'b0_1_x_x_0_10_x_10_x_x, `CMP, 3'd2};
-        {`CMP, 3'd2}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, next_state, step} = {12'bx_0_1_x_x_xx_x_xx_x_1, `WAIT, 3'bxxx};
+        {`CMP, 3'd0}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, next_state, step} = {12'b1_0_0_0_0_10_0_00_0_0, `CMP, 3'd1};
+        {`CMP, 3'd1}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, next_state, step} = {12'b0_1_0_0_0_10_0_10_0_0, `CMP, 3'd2};
+        {`CMP, 3'd2}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, next_state, step} = {12'b0_0_1_0_0_10_0_10_0_1, `WAIT, 3'd0};
         
-        {`AND, 3'd0}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, next_state, step} = {12'b1_x_x_0_x_10_0_00_0_x, `AND, 3'd1};
-        {`AND, 3'd1}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, next_state, step} = {12'b0_1_x_x_0_10_x_10_x_x, `AND, 3'd2};
-        {`AND, 3'd2}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, next_state, step} = {12'bx_0_1_x_x_10_x_xx_x_x, `AND, 3'd3};
-        {`AND, 3'd3}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, next_state, step} = {12'bx_x_0_x_x_00_1_01_x_x, `WAIT, 3'bxxx};
+        {`AND, 3'd0}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, next_state, step} = {12'b1_0_0_0_0_10_0_00_0_0, `AND, 3'd1};
+        {`AND, 3'd1}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, next_state, step} = {12'b0_1_0_0_0_10_0_10_0_0, `AND, 3'd2};
+        {`AND, 3'd2}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, next_state, step} = {12'b0_0_1_0_0_10_0_10_0_0, `AND, 3'd3};
+        {`AND, 3'd3}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, next_state, step} = {12'b0_0_0_0_0_00_1_01_0_0, `WAIT, 3'd0};
         
-        {`MVN, 3'd0}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, next_state, step} = {12'bx_1_1_1_x_10_0_10_0_x, `MVN, 3'd1};
-        {`MVN, 3'd1}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, next_state, step} = {12'bx_0_0_0_x_00_1_01_x_x, `WAIT, 3'bxxx};
+        {`MVN, 3'd0}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, next_state, step} = {12'b0_1_1_1_0_10_0_10_0_0, `MVN, 3'd1};
+        {`MVN, 3'd1}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, next_state, step} = {12'b0_0_0_0_0_00_1_01_0_0, `WAIT, 3'd0};
           
         default:{loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, next_state, step} = {18'bx};
       endcase 
     end
     else begin
-    	loada = 0;
-    	loadb = 0;
-    	loadc = 0;
-      asel = 0;
-      bsel = 0;
-      vsel = 2;
-      write = 0;
-    	nsel  = 0;
-      next_state = `WAIT;
-      step = 0;
-      loads = 0;
+      loada = 1'b0;
+      loadb = 1'b0;
+      loadc = 1'b0;
+      asel = 1'b0;
+      bsel = 1'b0;
+      vsel = 2'b10;
+      write = 1'b0;
+      nsel  = 2'b00;
+      step = 3'd0;
+      loads = 1'b0;
       w = 1;
     end
   end           
@@ -93,6 +92,6 @@ module MuxChooser(a5, a4, a3, a2, a1, a0, muxC_in, muxC_out) ;
       5'b101_10: muxC_out = a4;
       5'b101_11: muxC_out = a5;
       default: muxC_out = {k{1'bx}} ;
- 		endcase
-	end 
+    endcase
+  end 
 endmodule
