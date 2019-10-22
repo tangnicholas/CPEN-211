@@ -7,7 +7,8 @@ module cpu(clk,reset,s,load,in,out,N,V,Z,w);
 
 //FSM CHOOSER VARIABLES
   wire [2:0] readnum, writenum;
-  wire [15:0] C, mdata;
+  wire [15:0] mdata, C;
+  assign out = C;
   wire [7:0] PC;
 
 // INSTRUCTION REGISTER 

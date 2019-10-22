@@ -28,7 +28,8 @@ module cpu_tb ();
     	//ADD 
     reset = 0; s = 1; load = 1; in = 16'b1010000101001000; #20;
     $display("w is %b, we expect 0 becuase we are in the middle of adding.", w);
-    	//check
+    	#20;
+//check
     $display("out is: %b, we expect 0000000000010000", out); 
     $display("N is: %b, we expect 0", N);
     $display ("Z is: %b, we expect 0", Z);
