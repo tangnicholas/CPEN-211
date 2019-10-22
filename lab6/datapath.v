@@ -10,7 +10,8 @@ A, B,C  SELECT
 
 */
 
-module datapath ( clk, readnum, vsel, loada, loadb, shift, asel, bsel, ALUop, loadc, loads, writenum, write, mdata, sximm8, PC, Z, V, N, C, sximm5); // recall from Lab 4 that KEY0 is 1 when NOT pushed) 
+module datapath ( clk, readnum, vsel, loada, loadb, shift, asel, bsel, ALUop, loadc, loads, writenum, write, 
+                  mdata, sximm8, PC, Z, V, N, C, sximm5); // recall from Lab 4 that KEY0 is 1 when NOT pushed) 
   input  [1:0] vsel ;
   input  loada;
   input  loadb;
@@ -21,38 +22,33 @@ module datapath ( clk, readnum, vsel, loada, loadb, shift, asel, bsel, ALUop, lo
   
   input  clk;
   input  write;
-  input  [15:0] mdata, sximm8;
+  input  [15:0] mdata, sximm8, sximm5;
   input  [7:0] PC;
   input  [2:0] readnum;
   input  [2:0] writenum;
-  input  [15:0] sximm5;
+  input  [1:0] ALUop;
+  input  [1:0] shift;
+  
   wire  [15:0] data_out;
   wire  [15:0] data_in;
-
   wire  [15:0] Ain;
   wire  [15:0] Bin; 
-  input  [1:0] ALUop; 
-  wire  [15:0] out; 
-  output  Z;
-  wire Z_in;
-  output V;
-  output N;
-
+  wire  [15:0] out;
   wire  [15:0] in;
-  input  [1:0] shift;
   wire [15:0] sout;
-  
-  output wire [15:0] C;
-  
-  //for between A and asel
+  wire Z_in;
+
+  //for between A and asel (an intermediate thing)
   wire  [15:0] amidout;
 
   //for checking overflow variable
   reg AddSubop;
   wire [15:0] s;
-  
-  assign PC = 8'b0;
-  assign mdata = 16'b0;
+
+  output  Z;
+  output V;
+  output N;
+  output wire [15:0] C;
 
 ///instantiating the modules to test
 
