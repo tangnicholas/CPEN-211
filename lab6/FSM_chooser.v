@@ -30,7 +30,7 @@ module FSM_chooser(clk, s, reset, opcode, op, nsel, w, loada, loadb, loadc, load
 
   always @(posedge clk) begin 
     
-    if (~((next_state === `WAIT & wANDs === 0) | reset === 1)) begin
+    if (next_state !== `WAIT | wANDs !== 0 | reset === 0) begin
       casex ({next_state, step}) 
         {`MOVRn, 3'bx}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, next_state, step} = {12'b0_0_0_0_0_10_1_00_0_0, `WAIT, 3'd0};
         

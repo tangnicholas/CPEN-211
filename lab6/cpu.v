@@ -43,7 +43,7 @@ vDFFE #(16) inreg(clk,load,in,inreg_out);
 //FSM declaration
   FSM_chooser stateMachine(.clk(clk), .s(s), .reset(reset), .opcode(opcode), .op(op), .nsel(nsel), .w(w), .loada(loada),
          .loadb(loadb), .loadc(loadc), .loads(loads), .asel(asel), .bsel(bsel), .write(write), .vsel(vsel));
-  datapath datapathInst(.clk(clk), .readnum(readnum), .vsel(vsel), .loada(loada), .loadb(loadb), .shift(shift), .asel(asel),
+  datapath DP(.clk(clk), .readnum(readnum), .vsel(vsel), .loada(loada), .loadb(loadb), .shift(shift), .asel(asel),
             .bsel(bsel), .ALUop(ALUop), .loadc(loadc), .loads(loads), .writenum(writenum), .write(write), .mdata(mdata),
             .sximm8(sximm8), .PC(PC), .Z(Z), .V(V), .N(N), .C(C), .sximm5(sximm5));
   
