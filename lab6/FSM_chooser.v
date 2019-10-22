@@ -15,19 +15,19 @@ module FSM_chooser(clk, s, reset, opcode, op, nsel, w, loada, loadb, loadc, load
   
   output [1:0] nsel, vsel;
   output w, loada, loadb, loadc, loads, asel, bsel, write;
+  
   reg loada, loadb, loadc, loads, asel, bsel, write, w;
-  reg [1:0] nsel, vsel;
-  
-  reg [2:0] next_state; 
+  reg [1:0] nsel, vsel; 
   reg [2:0] step;
-  
+  reg [2:0] next_state ;
 
-   
-  //reg [10:0] chosenOutput = {loada, loadb, loadc, asel, bsel, vsel, write, nsel, m}; //1, 1, 1, 1, 1, 2, 1, 2, m
+  wire [2:0] chosenOne;
   wire wANDs = w & s;
   
-  MuxChooser choose(`MVN, `AND, `CMP, `ADD, `MOVRd, `MOVRn, {opcode, op} , next_state);
-  
+  MuxChooser choose(`MVN, `AND, `CMP, `ADD, `MOVRd, `MOVRn, {opcode, op}, chosenOne);
+
+  assign chosenOne = next_state;
+
   always @(posedge clk) begin 
     
     if (~((next_state === `WAIT & wANDs === 0) | reset === 1)) begin
@@ -79,9 +79,11 @@ module MuxChooser(a5, a4, a3, a2, a1, a0, muxC_in, muxC_out) ;
   parameter k = 3;
   parameter m = 5;
   input [k-1:0] a5, a4, a3, a2, a1, a0;  // inputs
-  input  [m-1:0] muxC_in;          // binary select
-  output reg [k-1:0] muxC_out;
-  
+  input  [m-1:0] muxC_in;          
+  output [k-1:0] muxC_out;
+  reg [k-1:0] muxC_out;
+    
+
   always @(*) begin
     case(muxC_in) 
       5'b110_10: muxC_out = a0;

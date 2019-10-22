@@ -42,7 +42,7 @@ module datapath ( clk, readnum, vsel, loada, loadb, shift, asel, bsel, ALUop, lo
   input  [1:0] shift;
   wire [15:0] sout;
   
-  output reg [15:0] C;
+  output wire [15:0] C;
   
   //for between A and asel
   wire  [15:0] amidout;
