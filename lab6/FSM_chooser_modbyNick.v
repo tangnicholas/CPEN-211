@@ -23,38 +23,43 @@ module FSM_chooser(clk, s, reset, opcode, op, nsel, w, loada, loadb, loadc, load
 
   reg custom;
 
-  wire [2:0] chosenOne;
+  reg [2:0] chosenOne;
+  wire [2:0] chosenOne_reset;
   wire wANDs = w & s;
   
   MuxChooser choose(`MVN, `AND, `CMP, `ADD, `MOVRd, `MOVRn, {opcode, op}, chosenOne);
-  vDFFE #(3) vSelFF(clk, resetOrcustom, `WAIT, chosenOne);
+  vDFFE #(3) vSelFF(clk, resetOrcustom, `WAIT, chosenOne_reset);
 
   assign resetOrcustom = reset | custom;
+  assign chosenOne_reset = chosenOne;
 
   always @(posedge clk) begin
-    next_state  = chosenOne;
+    next_state = chosenOne_reset;
+
     casex ({next_state, step}) 
       {`MOVRn, 3'bx}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, custom, step} = {12'b0_0_0_0_0_10_1_00_0_0, 1'b1, 3'd0};
        
-      {`MOVRd, 3'd0}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, custom, step} = {12'b0_1_1_1_0_10_0_10_0_0, 1'b1, 3'd1};
+      {`MOVRd, 3'd0}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, custom, step} = {12'b0_1_1_1_0_10_0_10_0_0, 1'b0, 3'd1};
       {`MOVRd, 3'd1}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, custom, step} = {12'b0_0_0_0_0_00_1_01_0_0, 1'b1, 3'd0};
         
-      {`ADD, 3'd0}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, custom, step} = {12'b1_0_0_0_0_10_0_00_0_0, 1'b1, 3'd1};
-      {`ADD, 3'd1}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, custom, step} = {12'b0_1_0_0_0_10_0_10_0_0, 1'b1, 3'd2};
-      {`ADD, 3'd2}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, custom, step} = {12'b0_0_1_0_0_10_0_10_0_0, 1'b1, 3'd3};
+      {`ADD, 3'd0}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, custom, step} = {12'b1_0_0_0_0_10_0_00_0_0, 1'b0, 3'd1};
+      {`ADD, 3'd1}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, custom, step} = {12'b0_1_0_0_0_10_0_10_0_0, 1'b0, 3'd2};
+      {`ADD, 3'd2}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, custom, step} = {12'b0_0_1_0_0_10_0_10_0_0, 1'b0, 3'd3};
       {`ADD, 3'd3}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, custom, step} = {12'b0_0_0_0_0_00_1_01_0_0, 1'b1, 3'd0};
         
-      {`CMP, 3'd0}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, custom, step} = {12'b1_0_0_0_0_10_0_00_0_0, 1'b1, 3'd1};
-      {`CMP, 3'd1}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, custom, step} = {12'b0_1_0_0_0_10_0_10_0_0, 1'b1, 3'd2};
+      {`CMP, 3'd0}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, custom, step} = {12'b1_0_0_0_0_10_0_00_0_0, 1'b0, 3'd1};
+      {`CMP, 3'd1}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, custom, step} = {12'b0_1_0_0_0_10_0_10_0_0, 1'b0, 3'd2};
       {`CMP, 3'd2}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, custom, step} = {12'b0_0_1_0_0_10_0_10_0_1, 1'b1, 3'd0};
         
-      {`AND, 3'd0}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, custom, step} = {12'b1_0_0_0_0_10_0_00_0_0, 1'b1, 3'd1};
-      {`AND, 3'd1}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, custom, step} = {12'b0_1_0_0_0_10_0_10_0_0, 1'b1, 3'd2};
-      {`AND, 3'd2}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, custom, step} = {12'b0_0_1_0_0_10_0_10_0_0, 1'b1, 3'd3};
+      {`AND, 3'd0}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, custom, step} = {12'b1_0_0_0_0_10_0_00_0_0, 1'b0, 3'd1};
+      {`AND, 3'd1}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, custom, step} = {12'b0_1_0_0_0_10_0_10_0_0, 1'b0, 3'd2};
+      {`AND, 3'd2}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, custom, step} = {12'b0_0_1_0_0_10_0_10_0_0, 1'b0, 3'd3};
       {`AND, 3'd3}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, custom, step} = {12'b0_0_0_0_0_00_1_01_0_0, 1'b1, 3'd0};
         
-      {`MVN, 3'd0}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, custom, step} = {12'b0_1_1_1_0_10_0_10_0_0, 1'b1, 3'd1};
+      {`MVN, 3'd0}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, custom, step} = {12'b0_1_1_1_0_10_0_10_0_0, 1'b0, 3'd1};
       {`MVN, 3'd1}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, custom, step} = {12'b0_0_0_0_0_00_1_01_0_0, 1'b1, 3'd0};
+
+      {`WAIT, 3'bxxx}: {loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, custom, step} = {12'b0_0_0_0_0_00_0_00_0_0, 1'b0, 3'd0};
           
       default:{loada, loadb, loadc, asel, bsel, vsel, write, nsel, w, loads, next_state, step} = {16'bx};
     endcase 
@@ -69,15 +74,15 @@ module MuxChooser(a5, a4, a3, a2, a1, a0, muxC_in, muxC_out) ;
   input  [m-1:0] muxC_in;          
   output [k-1:0] muxC_out;
   reg [k-1:0] muxC_out;
-    
 
   always @(*) begin
-    casex(muxC_in)
+    case(muxC_in)
       5'b110_10: muxC_out = a0;
       5'b110_00: muxC_out = a1;
       5'b101_00: muxC_out = a2;
       5'b101_01: muxC_out = a3;
       5'b101_10: muxC_out = a4;
+      5'b101_11: muxC_out = a5;
       default: muxC_out = {k{1'bx}};
     endcase
   end 
@@ -97,5 +102,5 @@ module vDFFE(clk, en, din, dout);
   always @(posedge clk) begin
     dout = next_out;
   end
-  
+
 endmodule
