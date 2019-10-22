@@ -97,5 +97,5 @@ module vDFFE(clk, en, din, dout);
   always @(posedge clk) begin
     dout = next_out;
   end
-
+  
 endmodule
