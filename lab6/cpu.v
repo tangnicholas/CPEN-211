@@ -19,7 +19,7 @@ module cpu(clk, reset, s, load, in, out, N, V, Z, w);
   // if load is 1 --> copy value in to instruction register 
   // if load is 0 --> values 
   
-vDFFE #(16) inreg(clk,load,in,inreg_out);
+vDFFEg #(16) inreg(clk,load,in,inreg_out);
 
 //INSTRUCTION DECODER
 //declaration of variables
@@ -64,7 +64,7 @@ vDFFE #(16) inreg(clk,load,in,inreg_out);
 endmodule 
 
 //load enabled register 
-module vDFFE(clk, en, din, dout);
+module vDFFEg(clk, en, din, dout);
   parameter n = 16;
   input clk, en;
   input [n-1:0] din;
