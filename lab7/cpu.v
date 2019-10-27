@@ -12,7 +12,10 @@ module cpu(clk,
            N,
            V,
            Z,
-           w);
+           w,
+           mem_addr,
+           mem_cmd,
+           read_data);
   input clk, reset, s;
   input [15:0] in;
   output [15:0] out;
