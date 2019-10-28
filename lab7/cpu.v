@@ -1,3 +1,4 @@
+
 // Constants for the nsel possible values
 `define RN 3'b100
 `define RD 3'b010
@@ -8,7 +9,7 @@ module cpu(clk,
            s,
            load,
            in,
-           out,
+           write_data,
            N,
            V,
            Z,
@@ -36,14 +37,18 @@ module cpu(clk,
   //Lab7 FSM new stuff
   output [8:0] mem_addr;
   output [1:0] mem_cmd;
-  output [15:0] read_data;
+  output [15:0] write_data;
+  input [15:0] read_data;
   wire load_pc, load_ir, reset_pc, addr_sel, m_cmd;
+  wire load_addr;
   
   //Program Counter regs
   reg [8:0] modulePC_count;
   
+  //Data Address declarations
+  wire [8:0] dataAddressOut;
+ 
   //set to zero for lab6 only
-  assign mdata = 16'b0;
   assign PC = 8'b0;
   
   // Datapath instantiation with dot notation
@@ -63,12 +68,12 @@ module cpu(clk,
   .write(write),
   .datapath_in(sximm8),
   .sximm5(sximm5),
-  .mdata(mdata),
+  .mdata(read_data),
   .PC(PC),
   .Z_out(Z),
   .V_out(V),
   .N_out(N),
-  .datapath_out(out));
+  .datapath_out(write_data));
   
   // Instruction register without dot notation
   regLoad #(16) instructionRegister(clk, load_ir, read_data, instruction);
@@ -107,13 +112,19 @@ module cpu(clk,
                     .load_pc(load_pc),
                     .reset_pc(reset_pc),
                     .load_ir(load_ir),
+                    .mem_cmd(mem_cmd),
+                    .load_addr(load_addr)
                    );
   
   //Instantiates entire Program Counter, which includes the adding and the mux
   ProgramCounter pc(clk, reset_pc, modulePC_count);
   
+  //Data Address vDFF
+  regLoad #(9) dataAddress(clk, load_addr, write_data[8:0], dataAddressOut)
+  
   //takes output of Program Counter and 0's and mux them based on addr_sel
-  assign mem_addr = addr_sel ? modulePC_count : 9'b0;
+  assign mem_addr = addr_sel ? modulePC_count : dataAddressOut;
+
   
 endmodule
   
