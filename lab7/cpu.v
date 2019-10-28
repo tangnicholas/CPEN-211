@@ -112,7 +112,7 @@ module cpu(clk,
                     .load_pc(load_pc),
                     .reset_pc(reset_pc),
                     .load_ir(load_ir),
-                    .mem_cmd(m_cmd),
+                    .m_cmd(mem_cmd),
                     .load_addr(load_addr)
                    );
   
