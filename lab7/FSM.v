@@ -5,6 +5,10 @@
 `define MOVOPCODE 3'b110
 `define ALUOPCODE 3'b101
 
+`define LDROPCODE 3'b011
+`define STROPCODE 3'b100
+`define HALTOPCODE 3'b111
+
 // Operations -- note that more than one may share the same number since they may be in different categories
 `define ADDOP 2'b00
 `define CMPOP 2'b01
@@ -20,6 +24,7 @@
 `define IF1 `STATESIZE'd12
 `define IF2 `STATESZIE'd13 
 `define UPDATEPC `STATESIZE'd14
+`define HALTSTAGE `STATESIZE'd15
 
 `define DECODESTAGE `STATESIZE'd1
 `define MOVRNSTAGE `STATESIZE'd2
@@ -57,7 +62,15 @@ module InstructionSM(clk,
                      opcode,
                      op,
                      asel,
-                     bsel);
+                     bsel, 
+                     
+                     load_pc, 
+                     load_ir, 
+                     reset_pc, 
+                     addr_sel, 
+                     m_cmd,
+                     load_addr,
+                    );
   
   input clk, reset, start;
   output reg  loada, loadb, loadc, loads, write, asel, bsel;
@@ -65,6 +78,15 @@ module InstructionSM(clk,
   output reg [3:0] vsel;
   input [2:0] opcode;
   input [1:0] op;
+  
+  //Lab 7 outputs
+  
+  output load_pc, 
+  output load_ir, 
+  output reset_pc, 
+  output addr_sel, 
+  output [1:0] m_cmd,
+  output load_addr,
 
   // w is the wait signal, output when we are in the WAITSTAGE state
   output w;
@@ -88,8 +110,8 @@ module InstructionSM(clk,
       `RESET :begin
         proposedState  = `IF1;
         //resetPC = 1, load_pc = 1 ... 0 is inputed into and loaded by the program counter 
-        {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel, load_pc, load_ir, reset_pc, addr_sel, m_cmd } = {7'b0, 7'bx};
-        {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {1'b1, 1'bx, 1'b1, 1'bx, 1'bx};
+        {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {7'b0, 7'bx};
+        {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {1'b1, 1'bx, 1'b1, 1'bx, 2'bx};
       end
       
       // Current state is Not RESET: we iterate through onto DECODESTAGE regardless of other states on rising edge of clk cycle and set the outputs
@@ -97,28 +119,28 @@ module InstructionSM(clk,
         proposedState  = `IF2;
         // Current state is IF1, address in PC is sent to instruction memory, we go on to IF2
         //We make addr_sel = 1 and m_cmd = R
-        {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel, load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {7'b0, 7'bx};
+        {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {7'b0, 7'bx};
         {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {1'bx, 1'bx, 1'bx, 1'b1, R};
       end
       `IF2 :begin
         proposedState  = `UPDATEPC;
         //Current state is IF2, 16bit instruction should be at dout. 
         //We make addr_sel = 1, m_cmd = R, and load_ir = 1. Rest are x's 
-        {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel, load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {7'b0, 7'bx};
+        {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {7'b0, 7'bx};
         {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {1'bx, 1'b1, 1'bx, 1'b1, R};
       end
       `UPDATEPC :begin
         proposedState  = `DECODESTAGE;
         //Current state is UPDATEPC, we set load_pc = 1, updating the PC on the rising edge of clk. Then we go to DECODESTAGE
-        {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel, } = {7'b0, 7'bx};
-        {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {1'b1, 1'bx, 1'bx, 1'bx, 1'bx};
+        {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {7'b0, 7'bx};
+        {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {1'b1, 1'bx, 1'bx, 1'bx, 2'bx};
       end
      
       // For all states except for RESET, IF1, IF2, and UPDATEPC
       // In DECODESTAGE, we determine the next state based on the operation defined in opcode and op
       `DECODESTAGE : begin 
         {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {7'b0, 7'bx};
-        {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {5'bx};
+        {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {6'bx};
         // We first check opcode
         if (opcode === `MOVOPCODE) begin
           // Inside of the check for opcode, we check op, and move to the proper state
@@ -138,23 +160,43 @@ module InstructionSM(clk,
           else
             // If the input is outside of the expected values, we set the proposed state to all x, which lets us detect problems in ModelSim
             proposedState = {`STATESIZE{1'bx}};
+        end 
+       
+        // check if the OPCODE is for one of the new states: LDR, STR or HALT
+        else if (opcode === `LDROPCODE) begin
+          proposedState = `LOADASTAGE;
+          
+        end else if (opcode === `STROPCODE) begin
+          proposedState = `LOADBSTAGE;
+          
+          
+        end else if (opcode === `HALTOPCODE)begin
+          proposedState = `HALTSTAGE;
+          
         end else
           // If the input is outside of the expected values, we set the proposed state to all x, which lets us detect problems in ModelSim
           proposedState = {`STATESIZE{1'bx}};
       end
+     
+      
       // This state is specific to the operation where we load the value from the datapath input into a register
-      {`MOVRNSTAGE, 1'bx}: begin
+      `MOVRNSTAGE: begin
         {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {1'b1, 6'b0, `READDATAPATHIN, `RN};
+        {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {6'bx};
         proposedState  = `IF1;
       end
       // This multipurpose state allows us to load the value from Rn into register A
       `LOADASTAGE : begin
         {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {1'b0, 1'b1, 5'b0, 4'bx, `RN};
+        {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {6'bx};
         proposedState = `LOADBSTAGE;
       end
+      
+      
       // This multipurpose state allows us to load the value from Rm into register B
       `LOADBSTAGE : begin
         {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {2'b0, 1'b1, 4'b0, 4'bx, `RM};
+        {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {6'bx};
         // Since this is used by multiple different operations, we must decide on the next state based on op and opcode
         if(opcode === `MOVOPCODE)
           // Since only REGREG of the MOV operations uses this state, we don't need a second level of if statements
@@ -176,37 +218,60 @@ module InstructionSM(clk,
         end else
           proposedState = {`STATESIZE{1'bx}};
       end
+      
+      
       // The CMP state outputs only to the status register, and not the C register
       `CMPSTAGE : begin
         {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {4'b0, 1'b1, 2'b0, 7'bx};
+        {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {6'bx};
         proposedState = `IF1;
       end
+      
       // The AND and ADD stages differ only in ALU operation, which is passed directly to the ALU
       // They output to register C only
       `ANDADDSTAGE : begin
-        {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {3'b0, 1'b1, 3'b0, 7'bx, 5'bx};
+        {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {3'b0, 1'b1, 3'b0, 7'bx};
+        {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {6'bx};
         proposedState  = `WRITEBACKSTAGE;
       end
+      
       // The REGREG state differs from the ANDADD state by having asel be 1, since we want to add 0 to the number in the ALU
       `REGREGSTAGE : begin
-        {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {3'b0, 1'b1, 1'b0, 1'b1, 1'b0, 7'bx, 5'bx};
+        {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {3'b0, 1'b1, 1'b0, 1'b1, 1'b0, 7'bx};
+        {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {6'bx};
         proposedState = `WRITEBACKSTAGE;
       end
+      
       // The MVN state also has asel be 1, as we are again only dealing with the output of register b (and the shifter)
       `MVNSTAGE : begin
         {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {3'b0, 1'b1, 1'b0, 1'b1, 1'b0, 7'bx};
+        {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {6'bx};
         proposedState = `WRITEBACKSTAGE;
       end
+      
       // The WRITEBACK stage writes the contents of register C (and therefore datapath_out) to register Rd
       `WRITEBACKSTAGE : begin
         {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {1'b1, 6'b0, `READDATAPATHOUT, `RD};
+        {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {6'bx}; 
         proposedState = `IF1;
       end
+      
+      // The HALT stage causes the program counter to no longer be updated and it loops back to itself unconditionally until reset is triggered
+      `HALTSTAGE : begin 
+        {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {14'bx};
+        {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {1'b0, 5'bx}; 
+        proposedState = `HALTSTAGE;
+      end 
+      
+
+      
       default: begin 
         // If the input is outside of the expected values, we set the proposed state to all x, which lets us detect problems in ModelSim
         proposedState = {`STATESIZE{1'bx}};
         {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {7'b0, 7'bx};
+        {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {6'bx}; 
       end
+      
     endcase
   end
   
