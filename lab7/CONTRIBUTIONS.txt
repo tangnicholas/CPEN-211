@@ -1,4 +1,6 @@
 Lab6 code made by: Ryan Meshulam and Anusika Nijher (and thus used as a starting point for Lab 7)
+Their student numbers (for reference only) are 1819296 & 97859680
 
 6:30 - 8:30 24/10 --> Looked at lab 7 handout to understand the code.
-4:30 - 8:30 26/10 --> Met and worked on lab in EDC 303. Also recieved code (Ryan and Anusika's) to decipher and understand it.
+4:50 - 8:50 26/10 --> Met and worked on lab in EDC 303. Also recieved code (Ryan and Anusika's) to decipher and understand it.
+4:20 - 
