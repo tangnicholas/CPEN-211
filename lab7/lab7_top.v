@@ -18,10 +18,9 @@ module lab7_top(KEY,SW,LEDR,HEX0,HEX1,HEX2,HEX3,HEX4,HEX5);
   wire write;
   assign msel = (1'b0 === mem_addr[8:8]);
   assign enable = (`MREAD === mem_cmd) & msel;
-  assign write =  msel & (`MWRITE === mem_cmd)
+  assign write =  msel & (`MWRITE === mem_cmd);
   
-  //Tri-state driver ()
-	assign read_data = enable? dout : 16'bz;
+  //Tri-state driver ()assign read_data = enable? dout : 16'bz;
   
  //instantiating CPU & Read-Write Memory
   cpu cpu7(.clk(clk),
