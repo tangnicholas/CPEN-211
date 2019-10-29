@@ -6,8 +6,6 @@
 
 module cpu(clk,
            reset,
-           s,
-           load,
            in,
            write_data,
            N,
@@ -17,9 +15,8 @@ module cpu(clk,
            mem_addr,
            mem_cmd,
            read_data);
-  input clk, reset, s;
+  input clk, reset;
   input [15:0] in;
-  output [15:0] out;
   output N, V, Z, w;
   // Do not change above this line.
   
@@ -43,7 +40,7 @@ module cpu(clk,
   wire load_addr;
   
   //Program Counter regs
-  reg [8:0] modulePC_count;
+  wire [8:0] modulePC_count;
   
   //Data Address declarations
   wire [8:0] dataAddressOut;
@@ -93,7 +90,6 @@ module cpu(clk,
 
   // Instantiates the datapath controller FSM using dot notation
   InstructionSM FSM(.clk(clk),
-                    .start(s), //May have to delete not sure
                      .reset(reset),
                     .w(w), 		//May also have to delete unsure
                      .nsel(nsel),
@@ -117,10 +113,10 @@ module cpu(clk,
                    );
   
   //Instantiates entire Program Counter, which includes the adding and the mux
-  ProgramCounter pc(clk, reset_pc, modulePC_count);
+  ProgramCounter #(9) pc(clk, reset_pc, modulePC_count);
   
   //Data Address vDFF
-  regLoad #(9) dataAddress(clk, load_addr, write_data[8:0], dataAddressOut)
+  regLoad #(9) dataAddress(clk, load_addr, write_data[8:0], dataAddressOut);
   
   //takes output of Program Counter and 0's and mux them based on addr_sel
   assign mem_addr = addr_sel ? modulePC_count : dataAddressOut;
@@ -184,7 +180,7 @@ module ProgramCounter(clk, rst, count) ;
 
   wire   [n-1:0] next = rst ? 0 : count + 1 ;
 
-  vDFFPC #(n) count(clk, load_pc, next, count) ;
+  vDFFPC #(n) counter(clk, load_pc, next, count) ;
 endmodule
 
 // FLIP FLOP MODULE FOR THE PC COUNTER 
@@ -192,7 +188,7 @@ module vDFFPC (clk, load_pc, next, count);
   parameter n = 1; // width
   input clk, load_pc; 
   input [8:0] next;
-  output [8:0] clk;
+  output [8:0] count;
   reg [8:0] count; 
   
   always @(posedge clk) begin
