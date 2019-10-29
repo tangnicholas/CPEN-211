@@ -1,6 +1,12 @@
 Lab6 code made by: Ryan Meshulam and Anusika Nijher (and thus used as a starting point for Lab 7)
 Their student numbers (for reference only) are 1819296 & 97859680
 
+Contribution Log: 
+Veronica Nguyen and Nicholas Tang worked together at all sessions
 6:30 - 8:30 24/10 --> Looked at lab 7 handout to understand the code.
 4:50 - 8:50 26/10 --> Met and worked on lab in EDC 303. Also recieved code (Ryan and Anusika's) to decipher and understand it.
-4:20 - 
+4:20 - 8:00 27/10 --> Met at the Nest and worked through Stage 1 and 3
+5:20 - 7:00 28/10 --> Met in MCLD to work on editing Stage 2 (still have to code the STR instruction)
+12:00 -     29/10 --> Met in MCLD112 debugged lab_top for autograder and started on testbench
+                  --> Code STR finish TB 
+                  --> Implement on DE1SOC
