@@ -27,9 +27,8 @@ module lab7_top(KEY,SW,LEDR,HEX0,HEX1,HEX2,HEX3,HEX4,HEX5);
   assign read_data = enable? dout : 16'bz;
   
  //instantiating CPU & Read-Write Memory
-  cpu CPU(.clk(clk),
-           .reset(reset),
-           .in(in),
+  cpu CPU(.clk(~KEY[0]),
+          .reset(~KEY[1]),
            .write_data(write_data),
            .N(N),
            .V(V),
@@ -53,6 +52,7 @@ module lab7_top(KEY,SW,LEDR,HEX0,HEX1,HEX2,HEX3,HEX4,HEX5);
   assign HEX4 = 7'b1111111;
   assign {HEX5[2:1],HEX5[5:4]} = 4'b1111; // disabled
   assign LEDR[8] = 1'b0;
+  
   
   //instantiate SWdata and its corresponding tri state buffers
   wire SWdata_enable;
