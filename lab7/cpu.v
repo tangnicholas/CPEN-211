@@ -26,7 +26,7 @@ module cpu(clk,
   // datapath wires
   wire [3:0] vsel;
   wire [15:0] mdata;
-  wire [7:0] PC;
+  wire [8:0] PC;
   wire write, loada, loadb, loadc, loads, asel, bsel;
   
   //Lab7 FSM new stuff
@@ -37,14 +37,10 @@ module cpu(clk,
   wire load_pc, load_ir, reset_pc, addr_sel, m_cmd;
   wire load_addr;
   
-  //Program Counter regs
-  wire [8:0] modulePC_count;
-  
   //Data Address declarations
   wire [8:0] dataAddressOut;
  
   //set to zero for lab6 only
-  assign PC = 8'b0;
   
   // Datapath instantiation with dot notation
   datapath DP(
@@ -110,13 +106,13 @@ module cpu(clk,
                    );
   
   //Instantiates entire Program Counter, which includes the adding and the mux
-  ProgramCounter #(9) pc(clk, reset_pc, modulePC_count);
+  ProgramCounter #(9) pc(clk, reset_pc, load_pc, PC);
   
   //Data Address vDFF
   regLoad #(9) dataAddress(clk, load_addr, write_data[8:0], dataAddressOut);
   
   //takes output of Program Counter and 0's and mux them based on addr_sel
-  assign mem_addr = addr_sel ? modulePC_count : dataAddressOut;
+  assign mem_addr = addr_sel ? PC : dataAddressOut;
 
   
 endmodule
@@ -170,27 +166,28 @@ endmodule
 
 
 //PROGRAM COUNTER 
-module ProgramCounter(clk, rst, count) ;
+module ProgramCounter(clk, reset_pc, load_pc, PC) ;
   parameter n=5 ;
-  input rst, clk ; // reset and clock
-  output [n-1:0] count ;
+  input reset_pc, clk ; // reset and clock
+  output [n-1:0] PC ;
+  input load_pc;
+  wire [n-1:0] next_pc;
 
-  wire [n-1:0] next = rst ? 0 : count + 1 ;
+  assign next_pc = reset_pc ? 9'b0 : PC + 1'b1;
 
-  vDFFPC #(n) counter(clk, load_pc, next, count) ;
+  vDFFPC #(n) counter(clk, load_pc, next_pc, PC) ;
 endmodule
 
 // FLIP FLOP MODULE FOR THE PC COUNTER 
-module vDFFPC (clk, load_pc, next, count);
+module vDFFPC (clk, load_pc, next_pc, PC);
   parameter n = 1; // width
   input clk, load_pc; 
-  input [n-1:0] next;
-  output [n-1:0] count;
-  reg [n-1:0] count; 
+  input [n-1:0] next_pc;
+  output reg [n-1:0] PC;
   
   always @(posedge clk) begin
       if (load_pc === 1)
-        count = next;
+        PC <= next_pc;
   end
 endmodule
   

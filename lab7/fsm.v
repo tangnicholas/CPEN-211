@@ -126,7 +126,7 @@ module InstructionSM(clk,
   // This flip-flop stores the state
   vDFF #(`STATESIZE) stateFF(clk, nextState, state);
   
-  always @(posedge clk) begin
+  always @(*) begin
     // This case statement determines the next state based on the current state and the start signal
     // Additionally, it sets the outputs of the FSM to the datapath based on the current state
     case(state)
@@ -136,7 +136,7 @@ module InstructionSM(clk,
         //resetPC = 1, load_pc = 1 ... 0 is inputed into and loaded by the program counter 
         {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {7'b0, 4'b0010, 3'bx};
         {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {1'b1, 1'b0, 1'b1, 1'b0, 2'b00};
-        load_addr = 1'bx;
+        load_addr = 1'b0;
       end
       
       // Current state is Not RESET: we iterate through onto DECODESTAGE regardless of other states on rising edge of clk cycle and set the outputs
@@ -153,14 +153,14 @@ module InstructionSM(clk,
         //Current state is IF2, 16bit instruction should be at dout. 
         //We make addr_sel = 1, m_cmd = R, and load_ir = 1. Rest are x's 
         {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {7'b0, 7'bx};
-        {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {1'bx, 1'b1, 1'bx, 1'b1, `MREAD};
+        {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {1'b0, 1'b1, 1'b0, 1'b1, `MREAD};
         load_addr = 1'bx;
       end
       `UPDATEPC :begin
         proposedState  = `DECODESTAGE;
         //Current state is UPDATEPC, we set load_pc = 1, updating the PC on the rising edge of clk. Then we go to DECODESTAGE
         {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {7'b0, 7'bx};
-        {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {1'b1, 1'bx, 1'bx, 1'bx, 2'b00};
+        {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {1'b1, 1'b0, 1'b0, 1'bx, 2'b00};
         load_addr = 1'bx;
       end
      
@@ -168,7 +168,7 @@ module InstructionSM(clk,
       // In DECODESTAGE, we determine the next state based on the operation defined in opcode and op
       `DECODESTAGE: begin 
         {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {7'b0, 7'bx};
-        {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {6'bx};
+        {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {1'b0, 5'bx};
         load_addr = 1'bx;
         // We first check opcode
         if (opcode === `MOVOPCODE) begin
@@ -198,13 +198,12 @@ module InstructionSM(clk,
         end else if (opcode === `STROPCODE) begin
           proposedState = `LOADASTAGE;
           
-          
         end else if (opcode === `HALTOPCODE)begin
           proposedState = `HALTSTAGE;
           
         end else
           // If the input is outside of the expected values, we set the proposed state to all x, which lets us detect problems in ModelSim
-          proposedState = {`STATESIZE{1'bx}};
+          proposedState = `MOVRNSTAGE;
       end
      
       
@@ -231,7 +230,7 @@ module InstructionSM(clk,
         if (opcode === `LDROPCODE) begin 
           {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {2'b0, 1'b1, 3'b0, 1'b1, 4'bx, 3'bx};
           {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {6'bx};
-        load_addr = 1'bx;
+          load_addr = 1'bx;
         end 
         else if (opcode === `STROPCODE) begin 
           {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {2'b0, 1'b1, 3'b0, 1'b1, 4'bx, 3'bx};
