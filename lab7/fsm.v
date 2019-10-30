@@ -332,9 +332,16 @@ module InstructionSM(clk,
       
       //This stage is used in LDR, it loads the address
       `LOADADDRSTAGE : begin 
+        if (opcode == `LDROPCODE) begin
         {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {14'bx};
         {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {3'bx, 1'b1 ,2'bx}; 
         load_addr = 1'b1;
+        end 
+        else begin //is STROPCODE
+        {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {14'bx};
+        {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {3'bx, 1'b0 ,2'bx}; 
+        load_addr = 1'b1;
+        end 
         proposedState = `LOADMEMSTAGE;
       end 
       
