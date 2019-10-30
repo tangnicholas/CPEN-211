@@ -8,5 +8,5 @@ Veronica Nguyen and Nicholas Tang worked together at all sessions
 4:20 - 8:00 27/10 --> Met at the Nest and worked through Stage 1 and 3
 5:20 - 7:00 28/10 --> Met in MCLD to work on editing Stage 2 (still have to code the STR instruction)
 12:00 -2:00 29/10 --> Met in MCLD112 debugged lab_top for autograder and started on testbench
-6:20 - 9:00       --> Code STR & autograder debugging
-                  --> Implement on DE1SOC
+6:20 - 9:00       --> Met in MCLD112 Code STR & autograder debugging
+                  --> TB and Implement on DE1SOC
