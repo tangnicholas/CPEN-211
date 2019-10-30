@@ -349,12 +349,12 @@ module InstructionSM(clk,
       `LOADMEMSTAGE: begin 
         if (opcode ===`LDROPCODE) begin 
         {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {10'bx, 4'b0100, 3'bx};
-        {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {3'bx, 1'b0 ,`MREAD}; 
+        {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {3'bx, 1'b1 ,`MREAD}; 
         load_addr = 1'b0;
         end
         else begin 
         {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {10'bx, 4'b0100, 3'bx};
-          {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {3'bx, 1'b0 ,`MWRITE}; 
+        {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {3'bx, 1'b0 ,`MWRITE}; 
         load_addr = 1'b0;
         end
         proposedState = `IF1;
