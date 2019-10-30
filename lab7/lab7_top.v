@@ -1,5 +1,5 @@
-`define MREAD 2'bxx
-`define MWRITE 2'bxx
+`define MREAD 2'b01
+`define MWRITE 2'b10
 
 module lab7_top(KEY,SW,LEDR,HEX0,HEX1,HEX2,HEX3,HEX4,HEX5);
   input [3:0] KEY;
@@ -13,7 +13,6 @@ module lab7_top(KEY,SW,LEDR,HEX0,HEX1,HEX2,HEX3,HEX4,HEX5);
   wire [1:0] mem_cmd;
   wire [8:0] mem_addr;
   wire [15:0] read_data;
-  wire [15:0] in;
  
   //Tri state declaration and write AND gate
   wire enable;
@@ -28,7 +27,7 @@ module lab7_top(KEY,SW,LEDR,HEX0,HEX1,HEX2,HEX3,HEX4,HEX5);
   
  //instantiating CPU & Read-Write Memory
   cpu CPU(.clk(~KEY[0]),
-          .reset(~KEY[1]),
+           .reset(~KEY[1]),
            .write_data(write_data),
            .N(N),
            .V(V),
@@ -45,14 +44,13 @@ module lab7_top(KEY,SW,LEDR,HEX0,HEX1,HEX2,HEX3,HEX4,HEX5);
   assign HEX5[6] = ~N;
   assign HEX5[3] = ~V;
   // fill in sseg to display 4-bits in hexidecimal 0,1,2...9,A,B,C,D,E,F
-  sseg H0(out[3:0],   HEX0);
-  sseg H1(out[7:4],   HEX1);
-  sseg H2(out[11:8],  HEX2);
-  sseg H3(out[15:12], HEX3);
+  sseg H0(write_data[3:0],   HEX0);
+  sseg H1(write_data[7:4],   HEX1);
+  sseg H2(write_data[11:8],  HEX2);
+  sseg H3(write_data[15:12], HEX3);
   assign HEX4 = 7'b1111111;
   assign {HEX5[2:1],HEX5[5:4]} = 4'b1111; // disabled
   assign LEDR[8] = 1'b0;
-  
   
   //instantiate SWdata and its corresponding tri state buffers
   wire SWdata_enable;

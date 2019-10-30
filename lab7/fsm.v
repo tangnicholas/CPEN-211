@@ -1,14 +1,14 @@
 /* THINGS TO DO 
-	ASK TA: 
+  ASK TA: 
   
   What does | mean when it is on one side only (Nick QUestion)
   
-  		how to do stage2 instructions?
+      how to do stage2 instructions?
       how to explain the explanation ?
       what testbench do we need ?
       what is fetching? 
       double check logic for stage 1 & stage 3 
-	
+  
   1. finish stage 2
   2. edit stage 1/3
   3. write a testbench 
@@ -224,7 +224,7 @@ module InstructionSM(clk,
         if (opcode === `LDROPCODE | opcode === `STROPCODE)
           proposedState = `LOADBSEL_1;
         else
-       		proposedState = `LOADBSTAGE;
+          proposedState = `LOADBSTAGE;
       end
       
       //this state is used in the LDR stage. b_sel is 1. 
@@ -285,7 +285,7 @@ module InstructionSM(clk,
         {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {6'bx};
         load_addr = 1'bx;
         if (opcode === `LDROPCODE | opcode === `STROPCODE)
-        	proposedState = `WRITEBACK2STAGE;
+          proposedState = `WRITEBACK2STAGE;
         else
           proposedState  = `WRITEBACKSTAGE;
       end
@@ -331,7 +331,7 @@ module InstructionSM(clk,
       end 
       
       //This stage is used in LDR, it loads the address
-			`LOADADDRSTAGE : begin 
+      `LOADADDRSTAGE : begin 
         {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {14'bx};
         {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {3'bx, 1'b0 ,2'bx}; 
         load_addr = 1'b1;

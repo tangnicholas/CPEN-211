@@ -6,7 +6,6 @@
 
 module cpu(clk,
            reset,
-           in,
            write_data,
            N,
            V,
@@ -16,7 +15,6 @@ module cpu(clk,
            mem_cmd,
            read_data);
   input clk, reset;
-  input [15:0] in;
   output N, V, Z, w;
   // Do not change above this line.
   
