@@ -41,6 +41,19 @@ module lab7_top(KEY,SW,LEDR,HEX0,HEX1,HEX2,HEX3,HEX4,HEX5);
   
   RAM #(16,8) MEM(.clk(clk),.read_address(mem_addr[7:0]),.write_address(mem_addr[7:0]),.write(write),.din(write_data),.dout(dout));  
   
+  //sseg assignements 
+  assign HEX5[0] = ~Z;
+  assign HEX5[6] = ~N;
+  assign HEX5[3] = ~V;
+  // fill in sseg to display 4-bits in hexidecimal 0,1,2...9,A,B,C,D,E,F
+  sseg H0(out[3:0],   HEX0);
+  sseg H1(out[7:4],   HEX1);
+  sseg H2(out[11:8],  HEX2);
+  sseg H3(out[15:12], HEX3);
+  assign HEX4 = 7'b1111111;
+  assign {HEX5[2:1],HEX5[5:4]} = 4'b1111; // disabled
+  assign LEDR[8] = 1'b0;
+  
   //instantiate SWdata and its corresponding tri state buffers
   wire SWdata_enable;
   SWdata SWdata(9'h140, mem_cmd, mem_addr[8:0], SWdata_enable);
