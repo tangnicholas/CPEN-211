@@ -197,7 +197,7 @@ module InstructionSM(clk,
           proposedState = `LOADASTAGE;
           
         end else if (opcode === `STROPCODE) begin
-          proposedState = `LOADBSTAGE;
+          proposedState = `LOADASTAGE;
           
           
         end else if (opcode === `HALTOPCODE)begin
@@ -221,7 +221,7 @@ module InstructionSM(clk,
         {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {1'b0, 1'b1, 5'b0, 4'bx, `RN};
         {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {6'bx};
         load_addr = 1'bx;
-        if (opcode === `LDROPCODE)
+        if (opcode === `LDROPCODE | opcode === `STROPCODE)
           proposedState = `LOADBSEL_1;
         else
        		proposedState = `LOADBSTAGE;
@@ -229,9 +229,16 @@ module InstructionSM(clk,
       
       //this state is used in the LDR stage. b_sel is 1. 
       `LOADBSEL_1 : begin 
-        {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {2'b0, 1'b1, 3'b0, 1'b1, 4'bx, `RM};
+        if (opcode === `LDROPCODE) begin 
+        {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {2'b0, 1'b1, 3'b0, 1'b1, 4'bx, 3'bx};
         {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {6'bx};
         load_addr = 1'bx;
+        end 
+        else begin if (opcode === `STROPCODE) begin 
+        {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {2'b0, 1'b1, 3'b0, 1'b1, 4'bx, 3'bx};
+        {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {6'bx};
+        load_addr = 1'bx;
+        end end
         proposedState = `ANDADDSTAGE; 
       end 
       
@@ -277,7 +284,7 @@ module InstructionSM(clk,
         {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {3'b0, 1'b1, 3'b0, 7'bx};
         {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {6'bx};
         load_addr = 1'bx;
-        if (opcode === `LDROPCODE)
+        if (opcode === `LDROPCODE | opcode === `STROPCODE)
         	proposedState = `WRITEBACK2STAGE;
         else
           proposedState  = `WRITEBACKSTAGE;
@@ -333,9 +340,16 @@ module InstructionSM(clk,
       
       //This stage is used in LDR, it loads the value to memory. we make vsel = 0100
       `LOADMEMSTAGE: begin 
+        if (opcode ===`LDROPCODE) begin 
         {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {10'bx, 4'b0100, 3'bx};
         {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {3'bx, 1'b0 ,`MREAD}; 
         load_addr = 1'b0;
+        end
+        else begin 
+        {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {10'bx, 4'b0100, 3'bx};
+          {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {3'bx, 1'b0 ,`MWRITE}; 
+        load_addr = 1'b0;
+        end
         proposedState = `IF1;
       end 
       
