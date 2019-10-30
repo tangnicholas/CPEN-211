@@ -89,7 +89,6 @@ module InstructionSM(clk,
                      op,
                      asel,
                      bsel, 
-                     
                      load_pc, 
                      load_ir, 
                      reset_pc, 
@@ -121,22 +120,22 @@ module InstructionSM(clk,
   wire [`STATESIZE-1:0] state;
   reg [`STATESIZE-1:0] proposedState;
   wire [`STATESIZE-1: 0] nextState;
-  assign w = (state == `RESET | `IF1 | `IF2 | `UPDATEPC );
+  assign w = | (state === `RESET | `IF1 | `IF2 | `UPDATEPC );
   assign nextState = reset ? `RESET : proposedState;
   
   // This flip-flop stores the state
   vDFF #(`STATESIZE) stateFF(clk, nextState, state);
   
-  always @(*) begin
+  always @(posedge clk) begin
     // This case statement determines the next state based on the current state and the start signal
     // Additionally, it sets the outputs of the FSM to the datapath based on the current state
-    casex(state)
+    case(state)
       // Current state is RESET: we start the machine, going to the IF1
       `RESET :begin
         proposedState  = `IF1;
         //resetPC = 1, load_pc = 1 ... 0 is inputed into and loaded by the program counter 
-        {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {7'b0, 7'bx};
-        {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {1'b1, 1'bx, 1'b1, 1'bx, 2'bx};
+        {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {7'b0, 4'b0010, 3'bx};
+        {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {1'b1, 1'b0, 1'b1, 1'b0, 2'b00};
         load_addr = 1'bx;
       end
       
@@ -146,7 +145,7 @@ module InstructionSM(clk,
         // Current state is IF1, address in PC is sent to instruction memory, we go on to IF2
         //We make addr_sel = 1 and m_cmd = R
         {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {7'b0, 7'bx};
-        {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {1'bx, 1'bx, 1'bx, 1'b1, `MREAD};
+        {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {1'b0, 1'b0, 1'b0, 1'b1, `MREAD};
         load_addr = 1'bx;
       end
       `IF2 :begin
@@ -161,13 +160,13 @@ module InstructionSM(clk,
         proposedState  = `DECODESTAGE;
         //Current state is UPDATEPC, we set load_pc = 1, updating the PC on the rising edge of clk. Then we go to DECODESTAGE
         {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {7'b0, 7'bx};
-        {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {1'b1, 1'bx, 1'bx, 1'bx, 2'bx};
+        {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {1'b1, 1'bx, 1'bx, 1'bx, 2'b00};
         load_addr = 1'bx;
       end
      
       // For all states except for RESET, IF1, IF2, and UPDATEPC
       // In DECODESTAGE, we determine the next state based on the operation defined in opcode and op
-      `DECODESTAGE : begin 
+      `DECODESTAGE: begin 
         {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {7'b0, 7'bx};
         {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {6'bx};
         load_addr = 1'bx;
@@ -228,22 +227,22 @@ module InstructionSM(clk,
       end
       
       //this state is used in the LDR stage. b_sel is 1. 
-      `LOADBSEL_1 : begin 
+      `LOADBSEL_1: begin 
         if (opcode === `LDROPCODE) begin 
-        {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {2'b0, 1'b1, 3'b0, 1'b1, 4'bx, 3'bx};
-        {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {6'bx};
+          {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {2'b0, 1'b1, 3'b0, 1'b1, 4'bx, 3'bx};
+          {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {6'bx};
         load_addr = 1'bx;
         end 
-        else begin if (opcode === `STROPCODE) begin 
-        {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {2'b0, 1'b1, 3'b0, 1'b1, 4'bx, 3'bx};
-        {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {6'bx};
-        load_addr = 1'bx;
-        end end
+        else if (opcode === `STROPCODE) begin 
+          {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {2'b0, 1'b1, 3'b0, 1'b1, 4'bx, 3'bx};
+          {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {6'bx};
+          load_addr = 1'bx;
+        end
         proposedState = `ANDADDSTAGE; 
       end 
       
       // This multipurpose state allows us to load the value from Rm into register B
-      `LOADBSTAGE : begin
+      `LOADBSTAGE: begin
         {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {2'b0, 1'b1, 4'b0, 4'bx, `RM};
         {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {6'bx};
         load_addr = 1'bx;
@@ -271,7 +270,7 @@ module InstructionSM(clk,
       
       
       // The CMP state outputs only to the status register, and not the C register
-      `CMPSTAGE : begin
+      `CMPSTAGE: begin
         {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {4'b0, 1'b1, 2'b0, 7'bx};
         {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {6'bx};
         load_addr = 1'bx;
@@ -280,7 +279,7 @@ module InstructionSM(clk,
       
       // The AND and ADD stages differ only in ALU operation, which is passed directly to the ALU
       // They output to register C only
-      `ANDADDSTAGE : begin
+      `ANDADDSTAGE: begin
         {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {3'b0, 1'b1, 3'b0, 7'bx};
         {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {6'bx};
         load_addr = 1'bx;
@@ -291,7 +290,7 @@ module InstructionSM(clk,
       end
       
       // The REGREG state differs from the ANDADD state by having asel be 1, since we want to add 0 to the number in the ALU
-      `REGREGSTAGE : begin
+      `REGREGSTAGE: begin
         {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {3'b0, 1'b1, 1'b0, 1'b1, 1'b0, 7'bx};
         {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {6'bx};
         load_addr = 1'bx;
@@ -299,7 +298,7 @@ module InstructionSM(clk,
       end
       
       // The MVN state also has asel be 1, as we are again only dealing with the output of register b (and the shifter)
-      `MVNSTAGE : begin
+      `MVNSTAGE: begin
         {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {3'b0, 1'b1, 1'b0, 1'b1, 1'b0, 7'bx};
         {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {6'bx};
         load_addr = 1'bx;
@@ -307,7 +306,7 @@ module InstructionSM(clk,
       end
       
       // The WRITEBACK stage writes the contents of register C (and therefore datapath_out) to register Rd
-      `WRITEBACKSTAGE : begin
+      `WRITEBACKSTAGE: begin
         {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {1'b1, 6'b0, `READDATAPATHOUT, `RD};
         {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {6'bx}; 
         load_addr = 1'bx;
@@ -315,7 +314,7 @@ module InstructionSM(clk,
       end
       
       // The HALT stage causes the program counter to no longer be updated and it loops back to itself unconditionally until reset is triggered
-      `HALTSTAGE : begin 
+      `HALTSTAGE: begin 
         {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {14'bx};
         {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {1'b0, 5'bx}; 
         load_addr = 1'bx;
@@ -323,7 +322,7 @@ module InstructionSM(clk,
       end 
       
       //this WRITEBACK2 stage writes the contents of register C but not to register Rd
-      `WRITEBACK2STAGE : begin 
+      `WRITEBACK2STAGE: begin 
         {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {1'b1, 6'b0, 4'bx, 3'bx};
         {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {6'bx}; 
         load_addr = 1'bx;
@@ -331,16 +330,16 @@ module InstructionSM(clk,
       end 
       
       //This stage is used in LDR, it loads the address
-      `LOADADDRSTAGE : begin 
+      `LOADADDRSTAGE: begin 
         if (opcode == `LDROPCODE) begin
-        {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {14'bx};
-        {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {3'bx, 1'b1 ,2'bx}; 
-        load_addr = 1'b1;
+          {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {14'bx};
+          {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {3'bx, 1'b1 ,2'bx}; 
+          load_addr = 1'b1;
         end 
         else begin //is STROPCODE
-        {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {14'bx};
-        {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {3'bx, 1'b0 ,2'bx}; 
-        load_addr = 1'b1;
+          {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {14'bx};
+          {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {3'bx, 1'b0 ,2'bx}; 
+          load_addr = 1'b1;
         end 
         proposedState = `LOADMEMSTAGE;
       end 
@@ -348,14 +347,14 @@ module InstructionSM(clk,
       //This stage is used in LDR, it loads the value to memory. we make vsel = 0100
       `LOADMEMSTAGE: begin 
         if (opcode ===`LDROPCODE) begin 
-        {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {10'bx, 4'b0100, 3'bx};
-        {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {3'bx, 1'b1 ,`MREAD}; 
-        load_addr = 1'b0;
+          {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {7'bx, 4'b0100, 3'bx};
+          {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {3'bx, 1'b1 ,`MREAD}; 
+          load_addr = 1'b0;
         end
         else begin 
-        {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {10'bx, 4'b0100, 3'bx};
-        {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {3'bx, 1'b0 ,`MWRITE}; 
-        load_addr = 1'b0;
+          {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {7'bx, 4'b0100, 3'bx};
+          {load_pc, load_ir, reset_pc, addr_sel, m_cmd} = {3'bx, 1'b0 ,`MWRITE}; 
+          load_addr = 1'b0;
         end
         proposedState = `IF1;
       end 

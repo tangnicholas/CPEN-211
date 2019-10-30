@@ -18,12 +18,13 @@ module lab7_top(KEY,SW,LEDR,HEX0,HEX1,HEX2,HEX3,HEX4,HEX5);
   wire enable;
   wire msel;
   wire write;
-  assign msel = (1'b0 === mem_addr[8:8]);
+  assign msel = (1'b0 === mem_addr[8]);
   assign enable = (`MREAD === mem_cmd) & msel;
   assign write =  msel & (`MWRITE === mem_cmd);
+  wire clk, N, V, Z, w;
   
   //Tri-state driver
-  assign read_data = enable? dout : 16'bz;
+  assign read_data = enable ? dout : 16'bz;
   
  //instantiating CPU & Read-Write Memory
   cpu CPU(.clk(~KEY[0]),
@@ -35,7 +36,7 @@ module lab7_top(KEY,SW,LEDR,HEX0,HEX1,HEX2,HEX3,HEX4,HEX5);
            .w(w),
            .mem_addr(mem_addr),
            .mem_cmd(mem_cmd),
-           .read_data(read_data) );
+           .read_data(read_data));
   
   RAM #(16,8) MEM(.clk(clk),.read_address(mem_addr[7:0]),.write_address(mem_addr[7:0]),.write(write),.din(write_data),.dout(dout));  
   
@@ -74,7 +75,7 @@ module SWdata (hexinput, mem_cmd, mem_addr, SWdata_enable);
   
   //insert circuit code here:
   always @* begin
-    if (mem_addr === hexinput & mem_cmd === `MWRITE)
+    if ((mem_addr === hexinput) & (mem_cmd === `MREAD))
       SWdata_enable = 1;
     else
       SWdata_enable = 0;
@@ -90,10 +91,10 @@ module LEDout(hexinput, mem_cmd, mem_addr, LEDout_load);
   
   //insert circuit code here: 
     always @* begin
-      if (mem_addr === hexinput & mem_cmd === `MREAD)
-      LEDout_load = 1;
-    else
-      LEDout_load = 0;
+      if ((mem_addr === hexinput) & (mem_cmd === `MWRITE))
+        LEDout_load = 1;
+      else
+        LEDout_load = 0;
   end
 endmodule 
 

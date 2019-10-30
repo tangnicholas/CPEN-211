@@ -100,8 +100,7 @@ module cpu(clk,
                      .opcode(opcode),
                      .op(op),
                      .asel(asel),
-                    .bsel(bsel),
-                    
+                    .bsel(bsel),      
                     .addr_sel(addr_sel),
                     .load_pc(load_pc),
                     .reset_pc(reset_pc),
@@ -176,7 +175,7 @@ module ProgramCounter(clk, rst, count) ;
   input rst, clk ; // reset and clock
   output [n-1:0] count ;
 
-  wire   [n-1:0] next = rst ? 0 : count + 1 ;
+  wire [n-1:0] next = rst ? 0 : count + 1 ;
 
   vDFFPC #(n) counter(clk, load_pc, next, count) ;
 endmodule
@@ -185,9 +184,9 @@ endmodule
 module vDFFPC (clk, load_pc, next, count);
   parameter n = 1; // width
   input clk, load_pc; 
-  input [8:0] next;
-  output [8:0] count;
-  reg [8:0] count; 
+  input [n-1:0] next;
+  output [n-1:0] count;
+  reg [n-1:0] count; 
   
   always @(posedge clk) begin
       if (load_pc === 1)
