@@ -33,8 +33,9 @@ module cpu(clk,
   wire [3:0] vsel;
   wire [15:0] mdata;
   wire [8:0] PC, next_PC, dataAdressOut;
-  wire write, loada, loadb, loadc, loads, asel, bsel, loadir, loadpc, reset_pc, addr_sel, load_addr;
-  
+  wire write, loada, loadb, loadc, loads, asel, bsel, loadir, loadpc, addr_sel, load_addr;
+  wire [1:0] reset_pc;
+	
   // Datapath instantiation with dot notation
   datapath DP(
   .clk(clk),
