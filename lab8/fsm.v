@@ -105,7 +105,6 @@ module InstructionSM(clk,
   //mew inputs
   input N, V, Z;
   input [2:0] cond;
-  reg step;
   
   output reg  loada, loadb, loadc, loads, write, asel, bsel, loadir, loadpc, addr_sel, load_addr;
   output reg [1:0] mem_cmd, reset_pc;
