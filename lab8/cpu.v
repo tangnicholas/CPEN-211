@@ -105,7 +105,7 @@ module cpu(clk,
                      .reset_pc(reset_pc),
                      .addr_sel(addr_sel),
                      .mem_cmd(mem_cmd),
-                     .load_addr(load_addr)
+		    .load_addr(load_addr),
                      .N(N),
                      .V(V),
                      .Z(Z),
@@ -175,7 +175,7 @@ endmodule
           2'b00: out  = r0;
           2'b01: out  = r1;
           2'b10: out  = r2;
-          2'b11: out  = r3
+          2'b11: out  = r3;
           default: out = {n{1'bx}}; // default is a output of all "don't cares" for debugging purposes
         endcase
       end
