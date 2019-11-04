@@ -57,6 +57,7 @@
 `define CALLRETURNSTAGE `STATESIZE'd25
 `define R7PC `STATESIZE'd26
 `define PCRD `STATESIZE'd27
+`define PCRD2 `STATESIZE'd28
 
 // Vsel options
 `define READDATAPATHIN 4'b0010
@@ -283,7 +284,10 @@ module InstructionSM(clk,
         {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {3'b0, 1'b1, 1'b0, 1'b1, 1'b0, 7'bx};
         {loadir, loadpc, reset_pc} = 4'b0000;
         {load_addr, addr_sel, mem_cmd} = {1'b0, 1'b1, `MINACTIVE};
-        proposedState                            = `WRITEBACKSTAGE;
+        if (op === `BX | op === `BLX)
+          proposedState = `PCRD2;
+        else
+        proposedState  = `WRITEBACKSTAGE;
       end
       // The MVN state also has asel be 1, as we are again only dealing with the output of register b (and the shifter)
       `MVNSTAGE: begin
@@ -380,7 +384,10 @@ module InstructionSM(clk,
       `PCNORM: begin
         {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel, loadir, mem_cmd, load_addr} = {{7{1'b0}}, 7'bxxx, 1'b0, `MINACTIVE, 1'b0};
         {reset_pc, loadpc, addr_sel} = {2'b00, 1'b1, 1'b1};
-        proposedState = `IF1STAGE;
+        if (op === `BL | op === `BLX)
+          proposedState = `R7PC;
+        else 
+          proposedState = `IF1STAGE; 
       end 
       
       //PC = PC+Sxim8 + 1
@@ -393,9 +400,9 @@ module InstructionSM(clk,
       //determine which function call perform based on OP
       `CALLRETURNSTAGE: begin 
         if (op === `BL)
-          proposedState = `R7PC;
+          proposedState = `PCNORM;
         else if (op === `BLX)
-          proposedState = `R7PC;
+          proposedState = `PCNORM;
         else if (cond === `BX)
           proposedState = `PCRD;
         else 
@@ -404,20 +411,32 @@ module InstructionSM(clk,
       
       //Saves PC+1 to link register (R7) 
       `R7PC: begin 
-        if (op === `BL) begin 
-          //insert code to do something
+        {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {{7{1'b0}}, 4'b1000, `RN};
+        {loadir, loadpc, reset_pc} = 4'b0000;
+        {load_addr, addr_sel, mem_cmd} = {1'b0, 1'b0, `MINACTIVE};
+        if (op === `BL)  
           proposedState = `PC_SXIM8; //then update PC to address of the start of function call
-        end 
-        else if (op === `BLX) begin 
-          //insert code to do something
+        else if (op === `BLX)
           proposedState = `PCRD; //then copies the specified register to PC
+        else
+          proposedState = {`STATESIZE{1'bx}};
         end 
+      
+      //Copies the specified register to PC 
+      
+      `PCRD: begin 
+        //load contents of RD to B 
+        {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {2'b0, 1'b1, 4'b0, 4'bx, `RD};
+        {loadir, loadpc, reset_pc} = 4'b0000;
+        {load_addr, addr_sel, mem_cmd} = {1'b0, 1'b1, `MINACTIVE};
+        proposedState = `REGREGSTAGE; //load 0's to A
       end 
       
-      //Copies the specified register to PC
-      `PCRD: begin 
-        //insert code to do something
-        proposedState = `IF1STAGE;  // ???
+      `PCRD2: begin //PC = datapath_out stage
+        {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {1'b0, {6{1'b0}}, 7'bx};
+        {loadir, loadpc, reset_pc} = 4'b0011;
+        {load_addr, addr_sel, mem_cmd} = {1'b0, 1'b1, `MINACTIVE};
+        proposedState = `IF1STAGE;
       end 
           
       default : begin 
