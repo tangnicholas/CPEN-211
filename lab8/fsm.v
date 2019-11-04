@@ -209,7 +209,7 @@ module InstructionSM(clk,
           proposedState = `HLTSTAGE;
         end if (opcode === `BRANCH_OPCODE) begin 
         // When the OPCODE indicates a branch instruction, go to the BRANCHSTATE
-          proposedState = `BRANCHSTATE;
+          proposedState = `BRANCHSTAGE;
         end else if (opcode === `CALL_OPCODE) begin 
         //When the OPCODE indicates a Call & Return function, go to CALLRETURNSTATE
           proposedState = `CALLRETURNSTAGE;
@@ -220,7 +220,7 @@ module InstructionSM(clk,
       // This state is specific to the operation where we load the value from the datapath input into a register
       `MOVRNSTAGE: begin
         {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {1'b1, 6'b0, `READDATAPATHIN, `RN};
-        {loadir, loadpc, reset_pc} = 3'b0000;
+        {loadir, loadpc, reset_pc} = 3'b000;
         {load_addr, addr_sel, mem_cmd} = {1'b0, 1'b1, `MINACTIVE};
         proposedState                            = `IF1STAGE;
       end
@@ -391,7 +391,7 @@ module InstructionSM(clk,
       end 
       
       //determine which function call perform based on OP
-      `CALLRETURNSTATE: begin 
+      `CALLRETURNSTAGE: begin 
         if (op === `BL)
           proposedState = `R7PC;
         else if (op === `BLX)
@@ -408,7 +408,7 @@ module InstructionSM(clk,
           //insert code to do something
           proposedState = `PC_SXIM8; //then update PC to address of the start of function call
         end 
-        else (op === `BLX) begin 
+        else if (op === `BLX) begin 
           //insert code to do something
           proposedState = `PCRD; //then copies the specified register to PC
         end 
@@ -420,7 +420,7 @@ module InstructionSM(clk,
         proposedState = `IF1STAGE;  // ???
       end 
           
-      default: begin 
+      default : begin 
         // If the input is outside of the expected values, we set the proposed state to all x, which lets us detect problems in ModelSim
         proposedState = {`STATESIZE{1'bx}};
         {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {7'b0, 7'bx};
