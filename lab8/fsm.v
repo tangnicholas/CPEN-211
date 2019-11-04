@@ -8,8 +8,9 @@
 `define LDROPCODE 3'b011
 `define STROPCODE 3'b100
 
-//Branch Instructions
+//LAB8 Instructions
 `define BRANCH_OPCODE 3'b001
+`define CALL_OPCODE 3'b010
 
 // Operations -- note that more than one may share the same number since they may be in different categories
 `define ADDOP 2'b00
@@ -19,6 +20,10 @@
 `define MOVOP 2'b10
 `define MOVRR 2'b00
 
+//LAB 8 opcode for Call & Return
+`define BL 2'b11
+`define BLX 2'b10
+`define BX 2'b00
 
 // Constants for states
 // Note that each state may be used for multiple instructions
@@ -45,10 +50,13 @@
 `define STORE1STAGE `STATESIZE'd20
 `define STORE2STAGE `STATESIZE'd21
 
-//branch stage
+//lab8 stages
 `define BRANCHSTAGE `STATESIZE'd22
 `define PC_SXIM8 `STATESIZE'd23
 `define PCNORM `STATESIZE'd24
+`define CALLRETURNSTAGE `STATESIZE'd25
+`define R7PC `STATESIZE'd26
+`define PCRD `STATESIZE'd27
 
 // Vsel options
 `define READDATAPATHIN 4'b0010
@@ -72,7 +80,6 @@
 `define BNE 3'b010
 `define BLT 3'b011
 `define BLE 3'b100
-
 
 // State Machine module declaration
 module InstructionSM(clk,
@@ -123,7 +130,7 @@ module InstructionSM(clk,
   wire [`STATESIZE-1: 0] nextState;
   assign nextState = reset ? `RESETSTAGE : proposedState;
   
-  assign w         = (opcode === `HLTOPCODE); // w is now linked to when the HALT instruction is loaded, signifying that the program has ended
+  assign w  = (opcode === `HLTOPCODE); // w is now linked to when the HALT instruction is loaded, signifying that the program has ended
 
   // This flip-flop stores the state
   vDFF #(`STATESIZE) stateFF(clk, nextState, state);
@@ -140,7 +147,7 @@ module InstructionSM(clk,
         {loadir, loadpc, reset_pc} = 4'b0000;
         {load_addr, addr_sel, mem_cmd} = {1'b0, 1'b1, `MINACTIVE};
         proposedState = `HLTSTAGE;
-        step = 1'b0;
+        
       end
       // The reset state resets the program counter to zero so that we start the program again
       `RESETSTAGE: begin
@@ -148,7 +155,6 @@ module InstructionSM(clk,
         {loadir, loadpc, reset_pc} = 4'b0101;
         {load_addr, addr_sel, mem_cmd} = {1'b0, 1'b1, `MINACTIVE};
         proposedState = `IF1STAGE;
-        step = 1'b0;
       end
       // The first stage, wherewe set the address selector to 1, so that we read from the PC logic
       `IF1STAGE: begin
@@ -156,7 +162,6 @@ module InstructionSM(clk,
         {loadir, loadpc, reset_pc} = 4'b0000;
         {load_addr, addr_sel, mem_cmd} = {1'b0, 1'b1, `MINACTIVE};
         proposedState = `IF2STAGE;
-        step = 1'b0;
       end
       // We now load the instruction register with the data from memory accessed in the previous state
       `IF2STAGE: begin
@@ -164,7 +169,6 @@ module InstructionSM(clk,
         {loadir, loadpc, reset_pc} = 4'b1000;
         {load_addr, addr_sel, mem_cmd} = {1'b0, 1'b1, `MREAD};
         proposedState = `PCSTAGE;
-        step = 1'b0;
       end
       // The PC state updates the program counter so that we move on to the next instruction on the next pass through the system
       `PCSTAGE: begin
@@ -172,14 +176,12 @@ module InstructionSM(clk,
         {loadir, loadpc, reset_pc} = 4'b0100;
         {load_addr, addr_sel, mem_cmd} = {1'b0, 1'b1, `MINACTIVE};
         proposedState = `DECODESTAGE;
-        step = 1'b0;
       end
       // In DECODESTAGE, we determine the next state based on the operation defined in opcode and op
       `DECODESTAGE: begin 
         {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {7'b0, 7'bx};
         {loadir, loadpc, reset_pc} = 4'b0000;
         {load_addr, addr_sel, mem_cmd} = {1'b0, 1'b1, `MINACTIVE};
-        step = 1'b0;
         // We first check opcode
         if (opcode === `MOVOPCODE) begin
           // Inside of the check for opcode, we check op, and move to the proper state
@@ -208,8 +210,11 @@ module InstructionSM(clk,
         end if (opcode === `BRANCH_OPCODE) begin 
         // When the OPCODE indicates a branch instruction, go to the BRANCHSTATE
           proposedState = `BRANCHSTATE;
+        end else if (opcode === `CALL_OPCODE) begin 
+        //When the OPCODE indicates a Call & Return function, go to CALLRETURNSTATE
+          proposedState = `CALLRETURNSTAGE;
         end else
-          // If the input is outside of the expected values, we set the proposed state to all x, which lets us detect problems in ModelSim
+        // If the input is outside of the expected values, we set the proposed state to all x, which lets us detect problems in ModelSim
           proposedState = {`STATESIZE{1'bx}};
       end
       // This state is specific to the operation where we load the value from the datapath input into a register
@@ -218,14 +223,12 @@ module InstructionSM(clk,
         {loadir, loadpc, reset_pc} = 3'b0000;
         {load_addr, addr_sel, mem_cmd} = {1'b0, 1'b1, `MINACTIVE};
         proposedState                            = `IF1STAGE;
-        step = 1'b0;
       end
       // This multipurpose state allows us to load the value from Rn into register A
       `LOADASTAGE: begin
         {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {1'b0, 1'b1, 5'b0, 4'bx, `RN};
         {loadir, loadpc, reset_pc} = 4'b0000;
         {load_addr, addr_sel, mem_cmd} = {1'b0, 1'b1, `MINACTIVE};
-        step = 1'b0;
         // If we are doing LDR or STR, then we go to SETADDRSTAGE
         if (|{(opcode === `LDROPCODE), (opcode === `STROPCODE)}) begin
           proposedState = `SETADDRSTAGE;
@@ -266,7 +269,6 @@ module InstructionSM(clk,
         {loadir, loadpc, reset_pc} = 4'b0000;
         {load_addr, addr_sel, mem_cmd} = {1'b0, 1'b1, `MINACTIVE};
         proposedState                            = `IF1STAGE;
-        step = 1'b0;
       end
       // The AND and ADD stages differ only in ALU operation, which is passed directly to the ALU
       // They output to register C only
@@ -275,7 +277,6 @@ module InstructionSM(clk,
         {loadir, loadpc, reset_pc} = 4'b0000;
         {load_addr, addr_sel, mem_cmd} = {1'b0, 1'b1, `MINACTIVE};
         proposedState                            = `WRITEBACKSTAGE;
-        step = 1'b0;
       end
       // The REGREG state differs from the ANDADD state by having asel be 1, since we want to add 0 to the number in the ALU
       `REGREGSTAGE: begin
@@ -283,7 +284,6 @@ module InstructionSM(clk,
         {loadir, loadpc, reset_pc} = 4'b0000;
         {load_addr, addr_sel, mem_cmd} = {1'b0, 1'b1, `MINACTIVE};
         proposedState                            = `WRITEBACKSTAGE;
-        step = 1'b0;
       end
       // The MVN state also has asel be 1, as we are again only dealing with the output of register b (and the shifter)
       `MVNSTAGE: begin
@@ -291,7 +291,6 @@ module InstructionSM(clk,
         {loadir, loadpc, reset_pc} = 4'b0000;
         {load_addr, addr_sel, mem_cmd} = {1'b0, 1'b1, `MINACTIVE};
         proposedState                      = `WRITEBACKSTAGE;
-        step = 1'b0;
       end
       // The WRITEBACK state writes the contents of register C (and therefore datapath_out) to register Rd
       `WRITEBACKSTAGE: begin
@@ -299,7 +298,6 @@ module InstructionSM(clk,
         {loadir, loadpc, reset_pc} = 4'b0000;
         {load_addr, addr_sel, mem_cmd} = {1'b0, 1'b1, `MINACTIVE};
         proposedState = `IF1STAGE;
-        step = 1'b0;
       end
       // The SETADDR state computes the address to STR or LDR to
       `SETADDRSTAGE: begin
@@ -307,7 +305,6 @@ module InstructionSM(clk,
         {loadir, loadpc, reset_pc} = 4'b0000;
         {load_addr, addr_sel, mem_cmd} = {1'b0, 1'b1, `MINACTIVE};
         proposedState = `LOADADDRSTAGE;
-        step = 1'b0;
       end
       // The first STORE state loads the value to store into register C, and therefore outputs it to datapath_out
       `STORE1STAGE: begin
@@ -315,7 +312,6 @@ module InstructionSM(clk,
         {loadir, loadpc, reset_pc} = 4'b0000;
         {load_addr, addr_sel, mem_cmd} = {1'b0, 1'b0, `MINACTIVE};
         proposedState = `STORE2STAGE;
-        step = 1'b0;
       end
       // The second STORE state writes the value from the register Rd (and subsequently registers B and C) into memory at the address previously computed
       `STORE2STAGE: begin
@@ -323,7 +319,6 @@ module InstructionSM(clk,
         {loadir, loadpc, reset_pc} = 4'b0000;
         {load_addr, addr_sel, mem_cmd} = {1'b0, 1'b0, `MWRITE};
         proposedState = `IF1STAGE;
-        step = 1'b0;
       end
       // The LOADADDR state loads the address register with the address computed in the SETADDR state
       `LOADADDRSTAGE: begin
@@ -348,7 +343,6 @@ module InstructionSM(clk,
         {loadir, loadpc, reset_pc} = 4'b0000;
         {load_addr, addr_sel, mem_cmd} = {1'b0, 1'b0, `MREAD};
         proposedState = `LDRWB2STAGE;
-        step = 1'b0;
       end
       // Subsequent to WriteBack 1, we have WriteBack 2, which actually writes back into register Rd
       `LDRWB2STAGE: begin
@@ -356,7 +350,6 @@ module InstructionSM(clk,
         {loadir, loadpc, reset_pc} = 4'b0000;
         {load_addr, addr_sel, mem_cmd} = {1'b0, 1'b0, `MREAD};
         proposedState = `IF1STAGE;
-      	step = 1'b0;
       end
       
       //BRANCHSTAGE decides which operation to perform based on the cond and operand values  
@@ -393,10 +386,40 @@ module InstructionSM(clk,
       //PC = PC+Sxim8 + 1
       `PC_SXIM8: begin
         {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel, loadir, mem_cmd, load_addr} = {{7{1'b0}}, 7'bxxx, 1'b0, `MINACTIVE, 1'b0};
-        {reset_pc, loadpc, addr_sel, step} = {2'b10, 1'b1, 1'b1, 4'd0};
+        {reset_pc, loadpc, addr_sel} = {2'b10, 1'b1, 1'b1};
       	proposedState = `IF1STAGE;
       end 
-        
+      
+      //determine which function call perform based on OP
+      `CALLRETURNSTATE: begin 
+        if (op === `BL)
+          proposedState = `R7PC;
+        else if (op === `BLX)
+          proposedState = `R7PC;
+        else if (cond === `BX)
+          proposedState = `PCRD;
+        else 
+          proposedState = {`STATESIZE{1'bx}};
+      end 
+      
+      //Saves PC+1 to link register (R7) 
+      `R7PC: begin 
+        if (op === `BL) begin 
+          //insert code to do something
+          proposedState = `PC_SXIM8; //then update PC to address of the start of function call
+        end 
+        else (op === `BLX) begin 
+          //insert code to do something
+          proposedState = `PCRD; //then copies the specified register to PC
+        end 
+      end 
+      
+      //Copies the specified register to PC
+      `PCRD: begin 
+        //insert code to do something
+        proposedState = `IF1STAGE;  // ???
+      end 
+          
       default: begin 
         // If the input is outside of the expected values, we set the proposed state to all x, which lets us detect problems in ModelSim
         proposedState = {`STATESIZE{1'bx}};
