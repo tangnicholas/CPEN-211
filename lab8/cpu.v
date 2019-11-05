@@ -19,7 +19,8 @@ module cpu(clk,
   output [15:0] out;
   output [8:0] mem_addr;
   output[1:0] mem_cmd;
-  output N, V, Z, w;
+  output N, V, Z;
+  output w;
   
   // instruction decoder stuff
   wire [15:0] instruction,sximm5, sximm8;
@@ -68,7 +69,7 @@ module cpu(clk,
   //Data Adress Reg
   regLoad #(9) DataAdress(clk, load_addr, out[8:0], dataAdressOut);
 
-  Mux4b #(9) pcmux(9'b0, (PC + 1'b1), (PC + 1'b1 + sximm8[8:0]), (out[8:0]), reset_pc, next_PC);
+  Mux4b #(9) pcmux((PC + 1'b1), 9'b0, (PC + 1'b1 + sximm8[8:0]), (out[8:0]), reset_pc, next_PC);
 
   assign mem_addr = addr_sel ? PC : dataAdressOut; //mem_adder will be dataaddress if adder_sel is 1'b1 otherwise it's just the PC counter
 
