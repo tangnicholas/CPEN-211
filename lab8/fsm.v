@@ -131,7 +131,7 @@ module InstructionSM(clk,
   wire [`STATESIZE-1: 0] nextState;
   assign nextState = reset ? `RESETSTAGE : proposedState;
   
-  assign w  = (opcode === `HLTOPCODE); // w is now linked to when the HALT instruction is loaded, signifying that the program has ended
+  assign w  = (state === `HLTSTAGE); // w is now linked to when the HALT instruction is loaded, signifying that the program has ended
 
   // This flip-flop stores the state
   vDFF #(`STATESIZE) stateFF(clk, nextState, state);
@@ -167,7 +167,7 @@ module InstructionSM(clk,
       // We now load the instruction register with the data from memory accessed in the previous state
       `IF2STAGE: begin
         {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {7'b0, 7'bx};
-        {loadir, loadpc, reset_pc} = 4'b1000;
+        {loadir, loadpc, reset_pc} = 4'b10_00;
         {load_addr, addr_sel, mem_cmd} = {1'b0, 1'b1, `MREAD};
         proposedState = `PCSTAGE;
       end
@@ -208,7 +208,7 @@ module InstructionSM(clk,
         // When HALT is the instruction, all roads lead to HALT
         end else if (opcode === `HLTOPCODE) begin
           proposedState = `HLTSTAGE;
-        end if (opcode === `BRANCH_OPCODE) begin 
+        end else if (opcode === `BRANCH_OPCODE) begin 
         // When the OPCODE indicates a branch instruction, go to the BRANCHSTATE
           proposedState = `BRANCHSTAGE;
         end else if (opcode === `CALL_OPCODE) begin 
