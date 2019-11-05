@@ -1,3 +1,4 @@
+
 `define NUM0 7'b1000000
 `define NUM1 7'b1001111
 `define NUM2 7'b0100100
@@ -20,9 +21,9 @@
 `define MWRITE 2'b10
 
 module lab8_top(KEY,SW,LEDR,HEX0,HEX1,HEX2,HEX3,HEX4,HEX5,CLOCK_50);
-input CLOCK_50;
 input [3:0] KEY;
 input [9:0] SW;
+input CLOCK_50;
 output [9:0] LEDR;
 output [6:0] HEX0, HEX1, HEX2, HEX3, HEX4, HEX5;
 
@@ -43,11 +44,11 @@ assign LEDR[9] = 1'b0;
 
 
 
-    //cpu instantitaion, clk connected to DE1 CLOCK_50, reset connected to KEY[1] (remembering flipped buttons),
+    //cpu instantitaion, connect clk to KEY[0], reset connected to KEY[1] (remembering flipped buttons),
     //in which is the future instruction is connected to read_data (from the RAM)
     //out is just the output from the datapath along side the various flags Z, N, V, w
     //the additional memory parameters are also passed 
-  cpu CPU( .clk   (CLOCK_50), 
+  cpu CPU( .clk   (CLOCK_50), // recall from Lab 4 that KEY0 is 1 when NOT pushed
          .reset (~KEY[1]),
          .in    (read_data), 
          .out   (out),
@@ -63,7 +64,7 @@ assign LEDR[9] = 1'b0;
     //RAM instantiation, making sure to use lower 8 bits for address and write signal defined above
     //din is the output of the datapath that should be stored into memory
     //dout is the output of the memory block
-    RAM MEM(.clk (CLOCK_50),
+    RAM MEM(.clk (~KEY[0]),
             .read_address(mem_addr[7:0]),
             .write_address(mem_addr[7:0]), 
             .write(writeRAM),
@@ -81,7 +82,7 @@ assign LEDR[9] = 1'b0;
   sseg H3(out[15:12], HEX3);
   assign HEX4 = 7'b1111111;
   assign {HEX5[2:1],HEX5[5:4]} = 4'b1111; // disabled
-  assign LEDR[8] = w;
+  assign LEDR[8] = w? 1'b1: 1'b0;
 
     //register for holding LED values
     regLoad #(8) LEDS(~KEY[0],loadLEDS, ledValues, LEDR[7:0]);
@@ -101,7 +102,7 @@ endmodule
 module RAM(clk,read_address,write_address,write,din,dout);
   parameter data_width = 16; 
   parameter addr_width = 8;
-  parameter filename = "lab8fig4.txt";
+  parameter filename = "lab8fig2.txt";
 
   input clk;
   input [addr_width-1:0] read_address, write_address;
