@@ -27,7 +27,7 @@ input CLOCK_50;
 output [9:0] LEDR;
 output [6:0] HEX0, HEX1, HEX2, HEX3, HEX4, HEX5;
 
-assign LEDR[9] = 1'b0;
+assign LEDR[8] = 1'b0;
 
   wire [15:0] out;
   wire  N, V, Z, w, msel, isMREAD, isMWRITE, writeRAM, loadLEDS, readSwitches;
@@ -64,7 +64,7 @@ assign LEDR[9] = 1'b0;
     //RAM instantiation, making sure to use lower 8 bits for address and write signal defined above
     //din is the output of the datapath that should be stored into memory
     //dout is the output of the memory block
-    RAM MEM(.clk (~KEY[0]),
+    RAM MEM(.clk (CLOCK_50),
             .read_address(mem_addr[7:0]),
             .write_address(mem_addr[7:0]), 
             .write(writeRAM),
@@ -85,7 +85,7 @@ assign LEDR[9] = 1'b0;
   assign LEDR[8] = w? 1'b1: 1'b0;
 
     //register for holding LED values
-    regLoad #(8) LEDS(~KEY[0],loadLEDS, ledValues, LEDR[7:0]);
+    regLoad #(8) LEDS(CLOCK_50,loadLEDS, ledValues, LEDR[7:0]);
 
   //for memory mapped I/O (block on left of Figure 7 labelled "design this circuit):
     assign readSwitches = isMREAD & (mem_addr === 9'b101000000); //check if we can read from switches
@@ -164,4 +164,3 @@ module vDFF(clk,D,Q);
   always @(posedge clk)
     Q <= D;
 endmodule
-
