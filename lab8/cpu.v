@@ -24,7 +24,7 @@ module cpu(clk,
   // instruction decoder stuff
   wire [15:0] instruction,sximm5, sximm8;
   wire [2:0] nsel,  opcode, readnum, writenum;
-  wire [1:0] ALUop, op, shift;
+  wire [1:0] ALUop, op, shift, reset_pc;
   
   wire [2:0] cond;
   assign cond = instruction[10:8];
@@ -34,8 +34,7 @@ module cpu(clk,
   wire [15:0] mdata;
   wire [8:0] PC, next_PC, dataAdressOut;
   wire write, loada, loadb, loadc, loads, asel, bsel, loadir, loadpc, addr_sel, load_addr;
-  wire [1:0] reset_pc;
-	
+  
   // Datapath instantiation with dot notation
   datapath DP(
   .clk(clk),
@@ -69,7 +68,7 @@ module cpu(clk,
   //Data Adress Reg
   regLoad #(9) DataAdress(clk, load_addr, out[8:0], dataAdressOut);
 
-  Mux4b (9'b0, (PC + 1'b1), (PC + 1'b1 + sximm8), (out), reset_pc, next_pc);
+  Mux4b #(9) pcmux(9'b0, (PC + 1'b1), (PC + 1'b1 + sximm8[8:0]), (out[8:0]), reset_pc, next_PC);
 
   assign mem_addr = addr_sel ? PC : dataAdressOut; //mem_adder will be dataaddress if adder_sel is 1'b1 otherwise it's just the PC counter
 
@@ -181,7 +180,3 @@ endmodule
         endcase
       end
     endmodule
-
-
-
-
