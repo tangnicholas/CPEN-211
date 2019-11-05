@@ -122,7 +122,7 @@ module InstructionSM(clk,
   input [1:0] op;
 
   // w is the wait signal, output when we are in the WAITSTAGE state
-  output w;
+  output wire w;
   
   // State is the current state, while nextState is the proposedState or WAITSTAGE if reset if 1
   // proposedState is the state that we will go to if reset is 0
@@ -153,14 +153,14 @@ module InstructionSM(clk,
       // The reset state resets the program counter to zero so that we start the program again
       `RESETSTAGE: begin
         {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {7'b0, 7'bx};
-        {loadir, loadpc, reset_pc} = 4'b0101;
+        {loadir, loadpc, reset_pc} = 4'b01_01;
         {load_addr, addr_sel, mem_cmd} = {1'b0, 1'b1, `MINACTIVE};
         proposedState = `IF1STAGE;
       end
       // The first stage, wherewe set the address selector to 1, so that we read from the PC logic
       `IF1STAGE: begin
         {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {7'b0, 7'bx};
-        {loadir, loadpc, reset_pc} = 4'b0000;
+        {loadir, loadpc, reset_pc} = 4'b00_00;
         {load_addr, addr_sel, mem_cmd} = {1'b0, 1'b1, `MINACTIVE};
         proposedState = `IF2STAGE;
       end
@@ -174,14 +174,14 @@ module InstructionSM(clk,
       // The PC state updates the program counter so that we move on to the next instruction on the next pass through the system
       `PCSTAGE: begin
         {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {7'b0, 7'bx};
-        {loadir, loadpc, reset_pc} = 4'b0100;
+        {loadir, loadpc, reset_pc} = 4'b01_00;
         {load_addr, addr_sel, mem_cmd} = {1'b0, 1'b1, `MINACTIVE};
         proposedState = `DECODESTAGE;
       end
       // In DECODESTAGE, we determine the next state based on the operation defined in opcode and op
       `DECODESTAGE: begin 
         {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {7'b0, 7'bx};
-        {loadir, loadpc, reset_pc} = 4'b0000;
+        {loadir, loadpc, reset_pc} = 4'b00_00;
         {load_addr, addr_sel, mem_cmd} = {1'b0, 1'b1, `MINACTIVE};
         // We first check opcode
         if (opcode === `MOVOPCODE) begin
