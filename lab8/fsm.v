@@ -208,7 +208,7 @@ module InstructionSM(clk,
         // When HALT is the instruction, all roads lead to HALT
         end else if (opcode === `HLTOPCODE) begin
           proposedState = `HLTSTAGE;
-        end else if (opcode === `BRANCH_OPCODE) begin 
+        end else if (opcode === `BRANCH_OPCODE & op === 3'b0) begin 
         // When the OPCODE indicates a branch instruction, go to the BRANCHSTATE
           proposedState = `BRANCHSTAGE;
         end else if (opcode === `CALL_OPCODE) begin 
@@ -357,7 +357,11 @@ module InstructionSM(clk,
       end
       
       //BRANCHSTAGE decides which operation to perform based on the cond and operand values  
-      `BRANCHSTAGE: begin  
+      `BRANCHSTAGE: begin
+        {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {7'b0, 7'bx};
+        {loadir, loadpc, reset_pc} = 4'b00_00;
+        {load_addr, addr_sel, mem_cmd} = {1'b0, 1'b1, `MINACTIVE};
+  
         if (cond === `B)
           proposedState = `PCNORM; 
         else if (cond === `BEQ & Z === 1)
@@ -392,13 +396,17 @@ module InstructionSM(clk,
       
       //PC = PC+Sxim8 + 1
       `PC_SXIM8: begin
-        {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel, loadir, mem_cmd, load_addr} = {{7{1'b0}}, 7'bxxx, 1'b0, `MINACTIVE, 1'b0};
+        {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel, loadir, mem_cmd, load_addr} = {{7{1'b0}}, `READDATAPATHIN, 3'bxxx, 1'b0, `MINACTIVE, 1'b0};
         {reset_pc, loadpc, addr_sel} = {2'b10, 1'b1, 1'b1};
       	proposedState = `IF1STAGE;
       end 
       
       //determine which function call perform based on OP
       `CALLRETURNSTAGE: begin 
+        {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {7'b0, 7'bx};
+        {loadir, loadpc, reset_pc} = 4'b00_00;
+        {load_addr, addr_sel, mem_cmd} = {1'b0, 1'b1, `MINACTIVE};
+
         if (op === `BL)
           proposedState = `PCNORM;
         else if (op === `BLX)
@@ -411,7 +419,7 @@ module InstructionSM(clk,
       
       //Saves PC+1 to link register (R7) 
       `R7PC: begin 
-        {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {{7{1'b0}}, 4'b1000, `RN};
+        {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {{7{1'b0}}, `READPC, `RN};
         {loadir, loadpc, reset_pc} = 4'b0000;
         {load_addr, addr_sel, mem_cmd} = {1'b0, 1'b0, `MINACTIVE};
         if (op === `BL)  
@@ -420,7 +428,7 @@ module InstructionSM(clk,
           proposedState = `PCRD; //then copies the specified register to PC
         else
           proposedState = {`STATESIZE{1'bx}};
-        end 
+      end 
       
       //Copies the specified register to PC 
       
@@ -434,7 +442,7 @@ module InstructionSM(clk,
       
       `PCRD2: begin //PC = datapath_out stage
         {write, loada, loadb, loadc, loads, asel, bsel, vsel, nsel} = {1'b0, {6{1'b0}}, 7'bx};
-        {loadir, loadpc, reset_pc} = 4'b0011;
+        {loadir, loadpc, reset_pc} = 4'b01_11;
         {load_addr, addr_sel, mem_cmd} = {1'b0, 1'b1, `MINACTIVE};
         proposedState = `IF1STAGE;
       end 

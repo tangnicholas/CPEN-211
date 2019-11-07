@@ -27,8 +27,6 @@ input CLOCK_50;
 output [9:0] LEDR;
 output [6:0] HEX0, HEX1, HEX2, HEX3, HEX4, HEX5;
 
-assign LEDR[8] = 1'b0;
-
   wire [15:0] out;
   wire  N, V, Z, w, msel, isMREAD, isMWRITE, writeRAM, loadLEDS, readSwitches;
   wire [1:0] mem_cmd;
@@ -82,7 +80,7 @@ assign LEDR[8] = 1'b0;
   sseg H3(out[15:12], HEX3);
   assign HEX4 = 7'b1111111;
   assign {HEX5[2:1],HEX5[5:4]} = 4'b1111; // disabled
-  assign LEDR[8] = w? 1'b1: 1'b0;
+  assign LEDR[8] = w;
 
     //register for holding LED values
     regLoad #(8) LEDS(CLOCK_50,loadLEDS, ledValues, LEDR[7:0]);
@@ -102,7 +100,7 @@ endmodule
 module RAM(clk,read_address,write_address,write,din,dout);
   parameter data_width = 16; 
   parameter addr_width = 8;
-  parameter filename = "lab8fig2.txt";
+  parameter filename = "lab8fig4.txt";
 
   input clk;
   input [addr_width-1:0] read_address, write_address;
@@ -164,3 +162,4 @@ module vDFF(clk,D,Q);
   always @(posedge clk)
     Q <= D;
 endmodule
+

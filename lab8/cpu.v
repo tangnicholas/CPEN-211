@@ -69,7 +69,7 @@ module cpu(clk,
   //Data Adress Reg
   regLoad #(9) DataAdress(clk, load_addr, out[8:0], dataAdressOut);
 
-  Mux4b #(9) pcmux((PC + 1'b1), 9'b0, (PC + 1'b1 + sximm8[8:0]), (out[8:0]), reset_pc, next_PC);
+  Mux4b #(9) pcmux((PC + 1'b1), 9'b0, (PC + sximm8[8:0]), (out[8:0]), reset_pc, next_PC);
 
   assign mem_addr = addr_sel ? PC : dataAdressOut; //mem_adder will be dataaddress if adder_sel is 1'b1 otherwise it's just the PC counter
 
