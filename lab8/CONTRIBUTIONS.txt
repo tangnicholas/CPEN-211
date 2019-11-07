@@ -6,7 +6,8 @@ Veronica Nguyen and Nicholas Tang worked together at all sessions and each contr
 5:30 - 8:30 02/11 --> Met in EDC 320, tried to edit our own Lab 7 code, but it didn't work out 
                       Looked at lab 8 handout to understand the problem
                       Also recieved code (Ryan and Anusika's) to decipher and understand it.
-5:00 - 9:00 03/10 --> Worked on the lab via CODESHARE and phone call 
+5:00 - 9:00 03/11 --> Worked on the lab via CODESHARE and phone call 
                       Veronica edited fsm.v to support Table 1 and Table 2
                       Nick edited cpu.v to support the new commands and prepared data.txt files
-5:00 - _:__ 04/10--> 
+12:00 -1:00 05/11 --> Debugged fsm and cpu to nearly work with autograder 
+7:00 - 10:00 06/11 --> Debug PC, FSM, tested on DE1SOC and devloped interrupt code.
