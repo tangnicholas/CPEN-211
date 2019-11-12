@@ -23,8 +23,7 @@ binary_search:
 	
 	LDR r5, [r0, r4, LSL #2] //store middleValue to r5
 	CMP r5, r1 //compare middleValue and key
-	BEQ  //if middleVlue = key 
-		MOV r6, r4	//KeyIndex = MiddleIndex
+	BEQ returnsearch  //if middleVlue = key 
 	BGT lowersearch //if middle > key go to uppersearch
 	BLT uppersearch  //if middle < key go to lowersearch 
 	
@@ -46,3 +45,11 @@ lowersearch: // middleindex becomes endIndex
 gototheend: //returns -1 
 	MOV r0, #-1
 	MOV PC, LR
+
+returnsearch:
+	MOV r6, r4	//KeyIndex = MiddleIndex
+						
+
+
+
+
