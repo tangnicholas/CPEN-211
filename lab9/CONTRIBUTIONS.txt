@@ -1,0 +1,8 @@
+For Lab 9, Veronica Nguyen and Nicholas Tang both equally contributed to the project. Video call meetings were done over CodeShare
+so edits could be seen in live time. 
+
+Contribution Log: 
+11/11/19: Video call 9:30-11:00pm - Understand the problem and converted the C code to ARM 
+11/11/20: Video call 9:30-11:00pm - Adjusted the ARM code to use the stack
+11/11/21: MCLD112    1:00-2:00pm  - Went to TA office hours to gain better understanding of how the link register works with stack
+          Video call 9:00-11:00pm - debugged the LR and tested on DE1
