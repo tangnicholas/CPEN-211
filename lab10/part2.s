@@ -7,7 +7,7 @@
  *
  * The interrupt service routine for the pushbutton KEYs indicates which KEY has
  * been pressed on the LED display.
- 
+      
  This code is from "interupt_example.s", as provided by Altera.
  ********************************************************************************/
 
@@ -22,11 +22,11 @@
             B       SERVICE_IRQ             // IRQ interrupt vector
             B       SERVICE_FIQ             // FIQ interrupt vector
 
-.text        
+.text  
+.global count_global
+      count_global: .fill 1,4,0x0
 .global     _start 
 _start:
-
-count_global: .word 0
 
 /* Set up stack pointers for IRQ and SVC processor modes */
             MOV     R1, #0b11010010         // interrupts masked, MODE = IRQ
@@ -37,7 +37,7 @@ count_global: .word 0
             MSR     CPSR, R1                // change to supervisor mode
             LDR     SP, =DDR_END - 3        // set SVC stack to top of DDR3 memory
 
-            BL      CONFIG_GIC              // configure the ARM generic interrupt controller
+            BL      CONFIG_GIC             // configure the ARM generic interrupt controller
 
                                             // write to the pushbutton KEY interrupt mask register
             LDR     R0, =KEY_BASE           // pushbutton KEY base address
@@ -48,12 +48,13 @@ count_global: .word 0
             MOV     R0, #0b01010011         // IRQ unmasked, MODE = SVC
             MSR     CPSR_c, R0              
 
-//add code to congigure the timer (referenced from DE1-SoC_Computer.pdf): 
-			LDR R2, =0xFFFEC600 // MPCore private timer base address
-			LDR R3, =100000000 // timeout = 1/(200 MHz) x 100×10 ∧ 6 = 0.5 sec
-			STR R3, [R2] // write to timer load register
-			MOV R3, #0b111 // set bits: I = 1,  A = 1, enable = 1, and prescaler is 0.
-			STR R3, [R2, #0x8] // write to timer control register
+//ADDED code to congigure the timer (referenced from DE1-SoC_Computer.pdf): 
+            LDR R2, =0xFFFEC600 // MPCore private timer base address
+            LDR R3, =100000000 // timeout = 1/(200 MHz) x 100×10 ∧ 6 = 0.5 sec
+            STR R3, [R2] // write to timer load register
+            MOV R3, #0b111 // set bits: I = 1,  A = 1, enable = 1, and prescaler is 0.
+            STR R3, [R2, #0x8] // write to timer control register
+            MSR CPSR_c, R0 
 
 IDLE:                                       
             B       IDLE                    // main program simply idles
@@ -84,18 +85,28 @@ SERVICE_IRQ:
             LDR     R4, =MPCORE_GIC_CPUIF   
             LDR     R5, [R4, #ICCIAR]       // read from ICCIAR
 
-//
-			LDR	R6, =count_global
-			ADD	R6, R6, #1
-			STR R6, =count_global
+//ADDED to check for timer interupt
+            CMP   R5, #MPCORE_PRIV_TIMER_IRQ
+            BNE   FPGA_IRQ1_HANDLER //if not timer interrupt, check key interrupt
 
-			CMP R5, #001
+TIMER_ISR:          
+            LDR   R6, =count_global
+            LDR   R7, [R6]  //load global variable
+            ADD   R7, R7, #1 //increment by 1
+            STR   R7, [R6] //store new value
+      //DISPLAY ON LEDs       
+            LDR   R8, =LED_BASE // base address of LED display
+            STR   R7, [R8] // display value on red LEDs
+            B EXIT_IRQ
+                
 
 FPGA_IRQ1_HANDLER:                          
-            CMP     R5, #KEYS_IRQ           
-UNEXPECTED: BNE     UNEXPECTED              // if not recognized, stop here
+            CMP     R5, #KEYS_IRQ   
 
-            BL      KEY_ISR                 
+UNEXPECTED: BNE     TIMER_ISR             // if not recognized, stop here
+            BL      KEY_ISR      
+
+
 EXIT_IRQ:                                   
 /* Write to the End of Interrupt Register (ICCEOIR) */
             STR     R5, [R4, #ICCEOIR]      // write to ICCEOIR
