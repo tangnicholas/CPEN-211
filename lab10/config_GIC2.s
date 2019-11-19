@@ -1,4 +1,3 @@
-
 				.include	"address_map_arm.s"
 /* 
  * Configure the Generic Interrupt Controller (GIC)
@@ -12,6 +11,11 @@ CONFIG_GIC:
 				 *	2. enable the interrupt in the ICDISERn register */
 				/* CONFIG_INTERRUPT (int_ID (R0), CPU_target (R1)); */
     			MOV		R0, #73					// KEY port (interrupt ID = 73)
+    			MOV		R1, #1					// this field is a bit-mask; bit 0 targets cpu0
+    			BL			CONFIG_INTERRUPT
+
+				//ADDED to configure timer 
+				MOV		R0, #29					// KEY port (interrupt ID = )
     			MOV		R1, #1					// this field is a bit-mask; bit 0 targets cpu0
     			BL			CONFIG_INTERRUPT
 
@@ -42,10 +46,7 @@ CONFIG_GIC:
 */
 CONFIG_INTERRUPT:
     			PUSH		{R4-R5, LR}
-				//Add two additonal calls to enable interrupts from JTAG UART
-				MOV R0, #18
-				MOV R1, #29
-    
+
     			/* Configure Interrupt Set-Enable Registers (ICDISERn). 
 				 * reg_offset = (integer_div(N / 32) * 4
 				 * value = 1 << (N mod 32) */
@@ -78,4 +79,3 @@ CONFIG_INTERRUPT:
 				STRB	R1, [R4]
     
     			POP		{R4-R5, PC}
-
