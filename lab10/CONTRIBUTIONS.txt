@@ -1,0 +1,8 @@
+For Lab 10, Veronica Nguyen and Nicholas Tang both equally contributed to the project. Video call meetings were done over CodeShare
+so edits could be seen in live time. 
+
+Contribution Log: 
+11/17/2019: Video call 8pm - 10pm: implemented part 1 and part 2
+11/18/2019: MCLD 112 9am-11am & 5pm - 7pm: debugged part 2
+11/19/2019: Video call 8pm-11pm: implemented part 3
+11/20/2019: NEST 7pm -8pm : implmented part 4 and hand-in
