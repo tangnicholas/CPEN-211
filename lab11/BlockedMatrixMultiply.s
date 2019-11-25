@@ -19,7 +19,7 @@ matrix_c:
 _start: 
 
 MOV R0, #2 //n
-MOV R11, #2 // load BLOCKSIZE
+MOV R11, #32 // load BLOCKSIZE
 LDR R1, =matrix_a //loads base address of matrix A
 LDR R2, =matrix_b //loads base address of matrix B
 LDR R3, =matrix_c //loads base address of matrix C
