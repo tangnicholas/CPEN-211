@@ -3,5 +3,5 @@ so edits could be seen in live time.
 
 Contribution Log: 
 11/24/2019: Video call 9pm-11pm:Implemented part 1 and wrote multiplication code for part 2
-11/25/2019: 
-11/26/2019:
+11/25/2019: 8-10pm Implemented Part 3 
+11/26/2019: Debugged part 2
